@@ -1,16 +1,9 @@
+// boardGeneration.cpp
 // Noah Betzen & Lonny Strunk
 // CS 405
-// Checkers AI
 
 // Compile and run with:
-// clang++ -Ofast --std=c++1y main.cpp -o main.o && ./main.o
-
-
-// char board[8][8] = {R,r,_,b,B} // Pro: simple math moves/jumps, easy print
-//                                   Cons: memory usage, convert for Net
-// char board[32] =    "     "    // Pro: 1/2 memory, I/O to Net
-//
-
+// clang++ -Ofast --std=c++1y boardGeneration.cpp -o boardGeneration.o && ./boardGeneration.o
 
 #include <iostream>
 using std::cout;
