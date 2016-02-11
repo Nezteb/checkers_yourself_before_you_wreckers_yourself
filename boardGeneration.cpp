@@ -61,12 +61,109 @@ vector<int> movesBoard = {
             26, -1, -1, 25,
             27, -1, -1, 26 };
 
+/*
+bool checkNearbySpace(const string &board, int space, int directionFromSpace, char piece)
+{
+    
+}
+
+bool checkSpace(const string &board, int space, char piece)
+{
+    if(board[space] == piece)
+    {
+        
+    }
+}
+*/
+
 vector<string> generateJumps(const string &currentBoard, int currentPieceIndex)
 {
     vector<string> possibleJumps;
+    string tempBoard;
 
-    // todo
+    int southEast;
+    int southWest;
+    int northEast;
+    int northWest;
 
+    int nextSouthEast;
+    int nextSouthWest;
+    int nextNorthEast;
+    int nextNorthWest;
+
+    if(currentBoard[currentPieceIndex] == 'r' || currentBoard[currentPieceIndex] == 'R')
+    {
+        southEast = movesBoard[currentPieceIndex * 4 + SE];
+        southWest = movesBoard[currentPieceIndex * 4 + SW];
+
+        if (currentBoard[southEast] == 'b' || currentBoard[southEast] == 'B')
+        {
+            nextSouthEast = movesBoard[southEast * 4 + SE];
+
+            if(currentBoard[nextSouthEast] == '_')
+            {
+                tempBoard = currentBoard;
+                tempBoard[southEast] = '_';
+                swap(tempBoard[currentPieceIndex], tempBoard[nextSouthEast]);
+
+                vector<string> tempJumps = generateJumps(tempBoard, nextSouthEast);
+                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+            }
+        }
+        if (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B')
+        {
+            nextSouthWest = movesBoard[southWest * 4 + SW];
+
+            if(currentBoard[nextSouthWest] == '_')
+            {
+                tempBoard = currentBoard;
+                tempBoard[southWest] = '_';
+                swap(tempBoard[currentPieceIndex], tempBoard[nextSouthWest]);
+
+                vector<string> tempJumps = generateJumps(tempBoard, nextSouthWest);
+                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+            }
+        }
+    }
+    if(currentBoard[currentPieceIndex] == 'R')
+    {
+        northEast = movesBoard[currentPieceIndex * 4 + NE];
+        northWest = movesBoard[currentPieceIndex * 4 + NW];
+
+        if (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B')
+        {
+            nextNorthEast = movesBoard[northEast * 4 + NE];
+
+            if(currentBoard[nextNorthEast] == '_')
+            {
+                tempBoard = currentBoard;
+                tempBoard[northEast] = '_';
+                swap(tempBoard[currentPieceIndex], tempBoard[nextNorthEast]);
+
+                vector<string> tempJumps = generateJumps(tempBoard, nextNorthEast);
+                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+            }
+        }
+        if (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B')
+        {
+            nextNorthWest = movesBoard[northWest * 4 + NW];
+
+            if(currentBoard[nextNorthWest] == '_')
+            {
+                tempBoard = currentBoard;
+                tempBoard[northWest] = '_';
+                swap(tempBoard[currentPieceIndex], tempBoard[nextNorthWest]);
+
+                vector<string> tempJumps = generateJumps(tempBoard, nextNorthWest);
+                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+            }
+        }
+    }
+
+    if(possibleJumps.empty())
+    {
+        return vector<string>{currentBoard};
+    }
     return possibleJumps;
 }
 
@@ -99,13 +196,11 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
             {
                 nextSouthEast = movesBoard[southEast * 4 + SE];
 
-                // todo
-
                 if(currentBoard[nextSouthEast] == '_')
                 {
                     tempBoard = currentBoard;
                     tempBoard[southEast] = '_';
-                    swap(tempBoard[i], tempBoard[nextSouthEast]);
+                    swap(tempBoard[redPieces[i].first], tempBoard[nextSouthEast]);
 
                     vector<string> tempJumps = generateJumps(tempBoard, nextSouthEast);
                     possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
@@ -113,20 +208,30 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
             }
             if (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B')
             {
-                // todo
+                nextSouthWest = movesBoard[southWest * 4 + SW];
+
+                if(currentBoard[nextSouthWest] == '_')
+                {
+                    tempBoard = currentBoard;
+                    tempBoard[southWest] = '_';
+                    swap(tempBoard[redPieces[i].first], tempBoard[nextSouthWest]);
+
+                    vector<string> tempJumps = generateJumps(tempBoard, nextSouthWest);
+                    possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+                }
             }
             if (possibleJumps.empty())
             {
                 if (currentBoard[southEast] == '_')
                 {
                     tempBoard = currentBoard;
-                    swap(tempBoard[i], tempBoard[southEast]);
+                    swap(tempBoard[redPieces[i].first], tempBoard[southEast]);
                     possibleMoves.push_back(tempBoard);
                 }
                 if (currentBoard[southWest] == '_')
                 {
                     tempBoard = currentBoard;
-                    swap(tempBoard[i], tempBoard[southWest]);
+                    swap(tempBoard[redPieces[i].first], tempBoard[southWest]);
                     possibleMoves.push_back(tempBoard);
                 }
             }
@@ -138,40 +243,65 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
 
             if (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B')
             {
-                tempBoard = currentBoard;
-                swap(tempBoard[i], tempBoard[southEast]);
-                possibleMoves.push_back(tempBoard);
+                nextNorthEast = movesBoard[northEast * 4 + NE];
+
+                if(currentBoard[nextNorthEast] == '_')
+                {
+                    tempBoard = currentBoard;
+                    tempBoard[northEast] = '_';
+                    swap(tempBoard[redPieces[i].first], tempBoard[nextNorthEast]);
+
+                    vector<string> tempJumps = generateJumps(tempBoard, nextNorthEast);
+                    possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+                }
             }
             if (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B')
             {
-                tempBoard = currentBoard;
-                swap(tempBoard[i], tempBoard[southWest]);
-                possibleMoves.push_back(tempBoard);
+                nextNorthWest = movesBoard[northWest * 4 + NW];
+
+                if(currentBoard[nextNorthWest] == '_')
+                {
+                    tempBoard = currentBoard;
+                    tempBoard[northWest] = '_';
+                    swap(tempBoard[redPieces[i].first], tempBoard[nextNorthWest]);
+
+                    vector<string> tempJumps = generateJumps(tempBoard, nextNorthWest);
+                    possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+                }
             }
             if(possibleJumps.empty())
             {
                 if (currentBoard[northEast] == '_')
                 {
                     tempBoard = currentBoard;
-                    swap(tempBoard[i], tempBoard[northEast]);
+                    swap(tempBoard[redPieces[i].first], tempBoard[northEast]);
                     possibleMoves.push_back(tempBoard);
                 }
                 if (currentBoard[northWest] == '_')
                 {
                     tempBoard = currentBoard;
-                    swap(tempBoard[i], tempBoard[northWest]);
+                    swap(tempBoard[redPieces[i].first], tempBoard[northWest]);
                     possibleMoves.push_back(tempBoard);
                 }
             }
         }
     }
 
+    if(!possibleJumps.empty())
+    {
+        cout << "POSSIBLE JUMPS: " << endl;
+        return possibleJumps;
+    }
+    cout << "POSSIBLE MOVES: " << endl;
     return possibleMoves;
 }
 
 int main()
 {
-    string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";
+
+    //string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";     // regular board  
+    string board = "______bBr_R_bbbB_____bB_________";     // to check jumps
+    //string board = "_______________________rrbb_____";     // red to king
 
     const char notKing = 'r';
     const char king = 'R';
