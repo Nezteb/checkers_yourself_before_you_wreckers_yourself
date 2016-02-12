@@ -76,6 +76,8 @@ bool checkSpace(const string &board, int space, char piece)
 }
 */
 
+//TODO: Red pieces to King conversions when they reach the end of the board
+
 vector<string> generateJumps(const string &currentBoard, int currentPieceIndex)
 {
     vector<string> possibleJumps;
@@ -105,8 +107,17 @@ vector<string> generateJumps(const string &currentBoard, int currentPieceIndex)
                 tempBoard = currentBoard;
                 tempBoard[southEast] = '_';
                 swap(tempBoard[currentPieceIndex], tempBoard[nextSouthEast]);
+                vector<string> tempJumps;
 
-                vector<string> tempJumps = generateJumps(tempBoard, nextSouthEast);
+                if(nextSouthEast >= 28 && tempBoard[nextSouthEast] == 'r') 
+                {
+                    tempBoard[nextSouthEast] = 'R';
+                    tempJumps.push_back(tempBoard);
+                } else
+                {
+                    tempJumps = generateJumps(tempBoard, nextSouthEast);
+                }
+
                 possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
             }
         }
@@ -119,8 +130,17 @@ vector<string> generateJumps(const string &currentBoard, int currentPieceIndex)
                 tempBoard = currentBoard;
                 tempBoard[southWest] = '_';
                 swap(tempBoard[currentPieceIndex], tempBoard[nextSouthWest]);
+                vector<string> tempJumps;
 
-                vector<string> tempJumps = generateJumps(tempBoard, nextSouthWest);
+                if(nextSouthWest >= 28 && tempBoard[nextSouthWest] == 'r') 
+                {
+                    tempBoard[nextSouthWest] = 'R';
+                    tempJumps.push_back(tempBoard);
+                } else
+                {
+                    tempJumps = generateJumps(tempBoard, nextSouthWest);
+                }
+
                 possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
             }
         }
@@ -201,8 +221,17 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     tempBoard = currentBoard;
                     tempBoard[southEast] = '_';
                     swap(tempBoard[redPieces[i].first], tempBoard[nextSouthEast]);
+                    vector<string> tempJumps;
 
-                    vector<string> tempJumps = generateJumps(tempBoard, nextSouthEast);
+                    if(nextSouthEast >= 28 && redPieces[i].second == 'r') 
+                    {
+                        tempBoard[nextSouthEast] = 'R';
+                        tempJumps.push_back(tempBoard);
+                    } else
+                    {
+                        tempJumps = generateJumps(tempBoard, nextSouthEast);
+                    }
+                    
                     possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
                 }
             }
@@ -215,8 +244,17 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     tempBoard = currentBoard;
                     tempBoard[southWest] = '_';
                     swap(tempBoard[redPieces[i].first], tempBoard[nextSouthWest]);
+                    vector<string> tempJumps;
 
-                    vector<string> tempJumps = generateJumps(tempBoard, nextSouthWest);
+                    if(nextSouthWest >= 28 && redPieces[i].second == 'r') 
+                    {
+                        tempBoard[nextSouthWest] = 'R';
+                        tempJumps.push_back(tempBoard);
+                    } else
+                    {
+                        tempJumps = generateJumps(tempBoard, nextSouthWest);
+                    }
+                    
                     possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
                 }
             }
@@ -226,12 +264,24 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                 {
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[southEast]);
+
+                    if(southEast >= 28 && redPieces[i].second == 'r') 
+                    {
+                        tempBoard[southEast] = 'R';
+                    }
+                    
                     possibleMoves.push_back(tempBoard);
                 }
                 if (currentBoard[southWest] == '_')
                 {
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[southWest]);
+
+                    if(southWest >= 28 && redPieces[i].second == 'r') 
+                    {
+                        tempBoard[southWest] = 'R';
+                    }
+
                     possibleMoves.push_back(tempBoard);
                 }
             }
@@ -300,8 +350,9 @@ int main()
 {
 
     //string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";     // regular board  
-    string board = "______bBr_R_bbbB_____bB_________";     // to check jumps
-    //string board = "_______________________rrbb_____";     // red to king
+    //string board = "______bBr_R_bbbB_____bB_________";     // to check jumps
+    //string board = "______________r_b_b__Rr_bbb_____";     // red to king
+    string board = "_________R___bb______bb_________";     // king cycle (duplicate board?) //TODO
 
     const char notKing = 'r';
     const char king = 'R';
