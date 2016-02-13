@@ -14,6 +14,8 @@ using std::string;
 using std::vector;
 #include <algorithm>
 using std::swap;
+using std::sort;
+using std::unique;
 #include <utility>
 using std::pair;
 
@@ -64,14 +66,14 @@ vector<int> movesBoard = {
 /*
 bool checkNearbySpace(const string &board, int space, int directionFromSpace, char piece)
 {
-    
+
 }
 
 bool checkSpace(const string &board, int space, char piece)
 {
     if(board[space] == piece)
     {
-        
+
     }
 }
 */
@@ -109,7 +111,7 @@ vector<string> generateJumps(const string &currentBoard, int currentPieceIndex)
                 swap(tempBoard[currentPieceIndex], tempBoard[nextSouthEast]);
                 vector<string> tempJumps;
 
-                if(nextSouthEast >= 28 && tempBoard[nextSouthEast] == 'r') 
+                if(nextSouthEast >= 28 && tempBoard[nextSouthEast] == 'r')
                 {
                     tempBoard[nextSouthEast] = 'R';
                     tempJumps.push_back(tempBoard);
@@ -132,7 +134,7 @@ vector<string> generateJumps(const string &currentBoard, int currentPieceIndex)
                 swap(tempBoard[currentPieceIndex], tempBoard[nextSouthWest]);
                 vector<string> tempJumps;
 
-                if(nextSouthWest >= 28 && tempBoard[nextSouthWest] == 'r') 
+                if(nextSouthWest >= 28 && tempBoard[nextSouthWest] == 'r')
                 {
                     tempBoard[nextSouthWest] = 'R';
                     tempJumps.push_back(tempBoard);
@@ -223,7 +225,7 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     swap(tempBoard[redPieces[i].first], tempBoard[nextSouthEast]);
                     vector<string> tempJumps;
 
-                    if(nextSouthEast >= 28 && redPieces[i].second == 'r') 
+                    if(nextSouthEast >= 28 && redPieces[i].second == 'r')
                     {
                         tempBoard[nextSouthEast] = 'R';
                         tempJumps.push_back(tempBoard);
@@ -231,7 +233,7 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     {
                         tempJumps = generateJumps(tempBoard, nextSouthEast);
                     }
-                    
+
                     possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
                 }
             }
@@ -246,7 +248,7 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     swap(tempBoard[redPieces[i].first], tempBoard[nextSouthWest]);
                     vector<string> tempJumps;
 
-                    if(nextSouthWest >= 28 && redPieces[i].second == 'r') 
+                    if(nextSouthWest >= 28 && redPieces[i].second == 'r')
                     {
                         tempBoard[nextSouthWest] = 'R';
                         tempJumps.push_back(tempBoard);
@@ -254,7 +256,7 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     {
                         tempJumps = generateJumps(tempBoard, nextSouthWest);
                     }
-                    
+
                     possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
                 }
             }
@@ -265,11 +267,11 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[southEast]);
 
-                    if(southEast >= 28 && redPieces[i].second == 'r') 
+                    if(southEast >= 28 && redPieces[i].second == 'r')
                     {
                         tempBoard[southEast] = 'R';
                     }
-                    
+
                     possibleMoves.push_back(tempBoard);
                 }
                 if (currentBoard[southWest] == '_')
@@ -277,7 +279,7 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[southWest]);
 
-                    if(southWest >= 28 && redPieces[i].second == 'r') 
+                    if(southWest >= 28 && redPieces[i].second == 'r')
                     {
                         tempBoard[southWest] = 'R';
                     }
@@ -339,17 +341,18 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
 
     if(!possibleJumps.empty())
     {
-        cout << "POSSIBLE JUMPS: " << endl;
+        sort(possibleJumps.begin(), possibleJumps.end());
+        possibleJumps.erase(unique(possibleJumps.begin(), possibleJumps.end()), possibleJumps.end());
         return possibleJumps;
     }
-    cout << "POSSIBLE MOVES: " << endl;
+
     return possibleMoves;
 }
 
 int main()
 {
 
-    //string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";     // regular board  
+    //string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";     // regular board
     //string board = "______bBr_R_bbbB_____bB_________";     // to check jumps
     //string board = "______________r_b_b__Rr_bbb_____";     // red to king
     string board = "_________R___bb______bb_________";     // king cycle (duplicate board?) //TODO
