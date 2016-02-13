@@ -50,7 +50,7 @@ int main()
     {
         for(int col=0; col<5; ++col)
         {
-            cout << "result(" << row << ", " << col << "): " << result(row,col) << endl;
+            cout << "result(row: " << row << ", col: " << col << "): " << result(row,col) << endl;
         }
     }
 
