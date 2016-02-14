@@ -24,6 +24,14 @@ using std::rand;
 #include <cassert>
 #include <cmath>
 using std::tanh;
+#include <functional>
+using std::ptr_fun;
+
+double sigmoid(double x)
+{
+    //x += 100;
+    return tanh(x);
+}
 
 int main(int argc, char *argv[])
 {
@@ -43,10 +51,16 @@ int main(int argc, char *argv[])
     vector<MatrixXXd> layers;
     vector<MatrixXXd> weights;
     
-    //cout << MatrixXXd(atoi(argv[1]),atoi(argv[2]))::Random() << endl;
+    MatrixXXd first(1, atoi(argv[1]));
+    first.setOnes();
+    layers.push_back(first);
+    
+    MatrixXXd temp1(atoi(argv[1]),atoi(argv[2]));
+    temp1.setRandom();
+    weights.push_back(temp1);
     
     // Create one matrix for each layer topology given (minus 1)
-    for(int i=1; i<argc-1; ++i)
+    for(int i=2; i<argc-1; ++i)
     {
         layers.push_back( MatrixXXd(1,atoi(argv[i])) );
         
@@ -56,15 +70,33 @@ int main(int argc, char *argv[])
     }
     layers.push_back( MatrixXXd(1,atoi(argv[argc-1])) );
     
+    for(int i=1; i<layers.size(); ++i)
+    {
+        // TODO: faster way to do unary expressions?
+        layers[i] = layers[i-1] * weights[i-1];
+        //layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
+        layers[i] = layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
+    }
+    
+    /*cout << "LAYERS:" << endl;
+    
     for(auto layer: layers)
     {
-        //cout << "Thing:\n" << layer << endl;
+        cout << "Layer:\n" << layer << endl;
     }
+    
+    cout << endl;
+    
+    cout << "WEIGHTS:" << endl;
     
     for(auto weight: weights)
     {
-        //cout << "Thing:\n" << weight << endl;
+        cout << "Weight:\n" << weight << endl;
     }
+    
+    cout << endl;*/
+    
+    cout << "OUTPUT LAYER:\n" << layers.back() << endl;
     
     return 0;
 }
