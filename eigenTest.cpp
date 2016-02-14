@@ -11,13 +11,16 @@
 using Eigen::Matrix;
 using Eigen::RowMajor;
 using Eigen::ColMajor;
+using Eigen::Dynamic;
 #include <iostream>
 using std::cout;
 using std::endl;
 
+typedef Matrix<double, Dynamic, Dynamic, RowMajor> MatrixXXd;
+
 int main()
 {
-    Matrix<double, 3, 4, RowMajor> operand1;
+    MatrixXXd operand1(3,4);
     operand1 << 1, 2, 3, 4,
                 5, 6, 7, 8,
                 9, 10, 11, 12;
@@ -26,7 +29,7 @@ int main()
 
     cout << endl;
 
-    Matrix<double, 4, 5, RowMajor> operand2;
+    MatrixXXd operand2(4,5);
     operand2 << 1, 2, 3, 4, 5,
                 6, 7, 8, 9, 10,
                 11, 12, 13, 14, 15,
@@ -36,7 +39,7 @@ int main()
 
     cout << endl;
 
-    Matrix<double, 3, 5, RowMajor> result;
+    MatrixXXd result(3,5);
 
     result = operand1 * operand2;
 
