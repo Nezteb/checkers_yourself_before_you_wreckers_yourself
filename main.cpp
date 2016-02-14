@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     vector<MatrixXXd> weights;
     
     MatrixXXd first(1, atoi(argv[1]));
-    first.setOnes();
+    first.setRandom();
     layers.push_back(first);
     
     MatrixXXd temp1(atoi(argv[1]),atoi(argv[2]));
