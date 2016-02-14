@@ -40,50 +40,52 @@ int main(int argc, char *argv[])
         cout << "INCORRECT USAGE\nProper Usage:\n\t"<< argv[0] << " inputLayer [otherLayers] outputLayer"
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
     }
-    
+
     /*cout << "TOPOLOGY:\n";
     for(int i=1; i<argc; ++i)
     {
         cout << "Layer " << i << ": " << argv[i] << " nodes\n";
     }
     cout << endl;*/
-    
+
     vector<MatrixXXd> layers;
     vector<MatrixXXd> weights;
-    
+
     MatrixXXd first(1, atoi(argv[1]));
     first.setRandom();
     layers.push_back(first);
-    
+
     MatrixXXd temp1(atoi(argv[1]),atoi(argv[2]));
     temp1.setRandom();
     weights.push_back(temp1);
-    
+
     // Create one matrix for each layer topology given (minus 1)
     for(int i=2; i<argc-1; ++i)
     {
         layers.push_back( MatrixXXd(1,atoi(argv[i])) );
-        
+
         MatrixXXd temp(atoi(argv[i]),atoi(argv[i+1]));
         temp.setRandom();
         weights.push_back(temp);
     }
     layers.push_back( MatrixXXd(1,atoi(argv[argc-1])) );
-    
+
     for(int i=0; i<1000000; ++i)
     {
         layers[0].setRandom();
-        
+
         for(int i=1; i<layers.size(); ++i)
         {
-            // TODO: faster way to do unary expressions?
+            // TODO: this is the slowest portion
             layers[i] = layers[i-1] * weights[i-1];
-            //layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
-            layers[i] = layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
+
+            // TODO: faster way to do unary expressions?
+            //layers[i].unaryExpr(ptr_fun(sigmoid));
+            layers[i] = layers[i].unaryExpr(ptr_fun(sigmoid));
         }
-        
+
         //cout << "OUTPUT LAYER:\n" << layers.back() << endl;
     }
-    
+
     return 0;
 }
