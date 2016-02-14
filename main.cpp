@@ -41,12 +41,12 @@ int main(int argc, char *argv[])
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
     }
     
-    cout << "TOPOLOGY:\n";
+    /*cout << "TOPOLOGY:\n";
     for(int i=1; i<argc; ++i)
     {
         cout << "Layer " << i << ": " << argv[i] << " nodes\n";
     }
-    cout << endl;
+    cout << endl;*/
     
     vector<MatrixXXd> layers;
     vector<MatrixXXd> weights;
@@ -70,33 +70,20 @@ int main(int argc, char *argv[])
     }
     layers.push_back( MatrixXXd(1,atoi(argv[argc-1])) );
     
-    for(int i=1; i<layers.size(); ++i)
+    for(int i=0; i<1000000; ++i)
     {
-        // TODO: faster way to do unary expressions?
-        layers[i] = layers[i-1] * weights[i-1];
-        //layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
-        layers[i] = layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
+        layers[0].setRandom();
+        
+        for(int i=1; i<layers.size(); ++i)
+        {
+            // TODO: faster way to do unary expressions?
+            layers[i] = layers[i-1] * weights[i-1];
+            //layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
+            layers[i] = layers[i].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid function defined above
+        }
+        
+        //cout << "OUTPUT LAYER:\n" << layers.back() << endl;
     }
-    
-    /*cout << "LAYERS:" << endl;
-    
-    for(auto layer: layers)
-    {
-        cout << "Layer:\n" << layer << endl;
-    }
-    
-    cout << endl;
-    
-    cout << "WEIGHTS:" << endl;
-    
-    for(auto weight: weights)
-    {
-        cout << "Weight:\n" << weight << endl;
-    }
-    
-    cout << endl;*/
-    
-    cout << "OUTPUT LAYER:\n" << layers.back() << endl;
     
     return 0;
 }
