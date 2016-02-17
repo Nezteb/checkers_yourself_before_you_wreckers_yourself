@@ -3,7 +3,10 @@
 // CS 405
 
 // Compile and run with:
-// clang++ -Ofast --std=c++1y -msse2 -fopenmp main.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
+// Linux:
+//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_DEBUG main.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
+// Mac: (need clang-omp installed)
+//     clang-omp -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_DEBUG main.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
 // Eigen matrix includes
 #include "Eigen/Core"
@@ -39,57 +42,52 @@ int main(int argc, char *argv[])
         cout << "INCORRECT USAGE\nProper Usage:\n\t"<< argv[0] << " inputLayer [otherLayers] outputLayer"
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
     }
-
-    /*cout << "TOPOLOGY:\n";
-    for(int i=1; i<argc; ++i)
+    
+    vector<int> inputs;
+    
+    for(int i=1; i<argc; ++i) // first input is program name
     {
-        cout << "Layer " << i-1 << ": " << argv[i] << " nodes\n";
+        inputs.push_back(atoi(argv[i]));
     }
-    cout << endl;*/
+
+    cout << "TOPOLOGY:\n";
+    for(int i=0; i<inputs.size(); ++i)
+    {
+        cout << "Layer " << i << ": " << inputs[i] << " nodes\n";
+    }
+    cout << endl;
 
     vector<MatrixXXd> layers;
     vector<MatrixXXd> weights;
 
-    //layers.push_back(Matrix<double, 1, 32, RowMajor>);
-    //layers.push_back(Matrix<double, 1, 40, RowMajor>);
-    //layers.push_back(Matrix<double, 1, 10, RowMajor>);
-    //layers.push_back(Matrix<double, 1, 1, RowMajor>);
-
-    MatrixXXd firstLayer(1, atoi(argv[1])); // input layer
-    firstLayer.setRandom();
-    layers.push_back(firstLayer);
-
-    MatrixXXd firstWeight(atoi(argv[1]),atoi(argv[2]));
-    firstWeight.setRandom();
-    weights.push_back(firstWeight);
-
-    // Create one matrix for each layer topology given (minus 1)
-    for(int i=2; i<argc-1; ++i)
+    for(int i=0; i<inputs.size(); ++i) // layers
     {
-        layers.push_back( MatrixXXd(1,atoi(argv[i])) );
-
-        MatrixXXd temp(atoi(argv[i]),atoi(argv[i+1]));
-        temp.setRandom();
-        weights.push_back(temp);
-    }
-    layers.push_back( MatrixXXd(1,atoi(argv[argc-1])) );
-
-    /*for(int i=0; i<layers.size(); ++i)
-    {
-        cout << "Layer " << i << ": " << layers[i].rows() << "x" << layers[i].cols() << "\n" << layers[i] << endl;
-        cout << endl;
+        layers.push_back( MatrixXXd(1, inputs[i]) );
+        layers[i].setRandom();
     }
     
-    for(int i=0; i<weights.size(); ++i)
+    for(int i=0; i<inputs.size()-1; ++i) // weights
     {
-        cout << "Weight " << i << ": " << weights[i].rows() << "x" << weights[i].cols() << "\n" << weights[i] << endl;
-        cout << endl;
+        weights.push_back( MatrixXXd(inputs[i], inputs[i+1]) );
+        weights[i].setRandom();
+    }
+
+    /*int j=0;
+    for(int i=0; i<layers.size(); ++i)
+    {
+        cout << "Layer " << i << ": " << layers[i].rows() << "x" << layers[i].cols() << "\n\n" << layers[i] << "\n" << endl;
+        
+        if(j<weights.size())
+        {
+            cout << "Weight " << j << ": " << weights[j].rows() << "x" << weights[j].cols() << "\n\n" << weights[j] << "\n" << endl;
+            ++j;
+        }
     }*/
 
-    int testCount = 1000000;
-    cout << "Testing " << testCount << " random sets of input (input size: " << atoi(argv[1]) << ") ..." << endl;
+    int testCount = 1000000; // one million evaluations
+    cout << "Testing " << testCount << " random sets of input (input size: " << inputs[0] << ") ..." << endl;
 
-    for(int i=0; i<testCount; ++i) // one million evaluations
+    for(int i=0; i<testCount; ++i)
     {
         layers[0].setRandom(); // randomize input layer
 
