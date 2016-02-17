@@ -3,7 +3,7 @@
 // CS 405
 
 // Compile and run with:
-// clang++ -Ofast --std=c++1y main.cpp -o main.o && ./main.o
+// clang++ -Ofast --std=c++1y main.cpp -o main.o && time ./main.o 32 40 10 1
 
 // Eigen matrix includes
 #include "Eigen/Core"
@@ -29,7 +29,6 @@ using std::ptr_fun;
 
 double sigmoid(double x)
 {
-    //x += 100;
     return tanh(x);
 }
 
@@ -41,17 +40,17 @@ int main(int argc, char *argv[])
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
     }
 
-    /*cout << "TOPOLOGY:\n";
+    cout << "TOPOLOGY:\n";
     for(int i=1; i<argc; ++i)
     {
-        cout << "Layer " << i << ": " << argv[i] << " nodes\n";
+        cout << "Layer " << i-1 << ": " << argv[i] << " nodes\n";
     }
-    cout << endl;*/
+    cout << endl;
 
     vector<MatrixXXd> layers;
     vector<MatrixXXd> weights;
 
-    MatrixXXd firstLayer(1, atoi(argv[1]));
+    MatrixXXd firstLayer(1, atoi(argv[1])); // input layer
     firstLayer.setRandom();
     layers.push_back(firstLayer);
 
@@ -70,21 +69,37 @@ int main(int argc, char *argv[])
     }
     layers.push_back( MatrixXXd(1,atoi(argv[argc-1])) );
 
-    for(int i=0; i<1000000; ++i)
+    for(int i=0; i<layers.size(); ++i)
     {
-        layers[0].setRandom();
+        cout << "Layer " << i << ": " << layers[i].rows() << "x" << layers[i].cols() << "\n" << layers[i] << endl;
+        cout << endl;
+    }
+    
+    cout << endl;
+    
+    for(int i=0; i<weights.size(); ++i)
+    {
+        cout << "Weight " << i << ": " << weights[i].rows() << "x" << weights[i].cols() << "\n" << weights[i] << endl;
+        cout << endl;
+    }
 
-        for(int i=1; i<layers.size(); ++i)
+    int testCount = 1;
+    cout << "Testing " << testCount << " random sets of input (input size: " << atoi(argv[1]) << ") ..." << endl;
+
+    for(int i=0; i<testCount; ++i) // one million evaluations
+    {
+        layers[0].setRandom(); // randomize input layer
+
+        for(int j=1; j<layers.size(); ++j) // go through all the layers
         {
             // TODO: this is the slowest portion
-            layers[i] = layers[i-1] * weights[i-1];
+            layers[j] = layers[j-1] * weights[j-1]; // next layer = previous layer * weights in between
 
             // TODO: faster way to do unary expressions?
-            //layers[i].unaryExpr(ptr_fun(sigmoid));
-            layers[i] = layers[i].unaryExpr(ptr_fun(sigmoid));
+            layers[j] = layers[j].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid to layer
         }
 
-        //cout << "OUTPUT LAYER:\n" << layers.back() << endl;
+        //cout << "OUTPUT: " << layers.back() << endl;
     }
 
     return 0;
