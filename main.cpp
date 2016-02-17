@@ -51,13 +51,13 @@ int main(int argc, char *argv[])
     vector<MatrixXXd> layers;
     vector<MatrixXXd> weights;
 
-    MatrixXXd first(1, atoi(argv[1]));
-    first.setRandom();
-    layers.push_back(first);
+    MatrixXXd firstLayer(1, atoi(argv[1]));
+    firstLayer.setRandom();
+    layers.push_back(firstLayer);
 
-    MatrixXXd temp1(atoi(argv[1]),atoi(argv[2]));
-    temp1.setRandom();
-    weights.push_back(temp1);
+    MatrixXXd firstWeight(atoi(argv[1]),atoi(argv[2]));
+    firstWeight.setRandom();
+    weights.push_back(firstWeight);
 
     // Create one matrix for each layer topology given (minus 1)
     for(int i=2; i<argc-1; ++i)

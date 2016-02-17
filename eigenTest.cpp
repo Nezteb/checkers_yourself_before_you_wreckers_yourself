@@ -56,6 +56,6 @@ int main()
             cout << "result(row: " << row << ", col: " << col << "): " << result(row,col) << endl;
         }
     }
-
+    
     return 0;
 }
