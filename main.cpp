@@ -3,10 +3,15 @@
 // CS 405
 
 // Compile and run with:
+//
 // Linux:
-//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_DEBUG main.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
+//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
+//
 // Mac: (need to figure out how to get support for OpenMP
-//     clang++ -Ofast --std=c++1y -msse2 -DEIGEN_NO_DEBUG main.cpp -o main.o && time ./main.o 32 40 10 1
+//     clang++ -Ofast --std=c++1y -msse2 -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time ./main.o 32 40 10 1
+//
+// SSE2 and OpenMP may actually make things slower, but include them for now...
+// Still need to figure out how to get OpenMP working on Mac
 
 // Eigen matrix includes
 #include "Eigen/Core"
