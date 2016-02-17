@@ -57,5 +57,20 @@ int main()
         }
     }
     
+    cout << "MULTIPLICATION TEST:" << endl;
+    
+    cout << "TEST 1:" << endl;
+    MatrixXXd test1(3,3);
+    test1 << 1,3,5,7,9,11,13,15,17;
+    cout << test1 << endl;
+    
+    cout << "TEST 2:" << endl;
+    MatrixXXd test2(3,3);
+    test2 << 2,4,6,8,10,12,14,16,18;
+    cout << test2 << endl;
+    
+    cout << "PRODUCT:" << endl;
+    cout << test1*test2 << endl;
+    
     return 0;
 }
