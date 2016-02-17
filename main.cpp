@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
         cout << endl;
     }
 
-    int testCount = 1;
+    int testCount = 1000000;
     cout << "Testing " << testCount << " random sets of input (input size: " << atoi(argv[1]) << ") ..." << endl;
 
     for(int i=0; i<testCount; ++i) // one million evaluations
