@@ -14,8 +14,10 @@ int main()
     
     for(int i=0; i<100000000; ++i) // one hundred million
     {
-        //x = tanh(x);
-        x += 1;
+        //x = x;
+        //x += 100;
+        //x = 1/(1+exp(-x));
+        x = tanh(x);
     }
     return x;
 }

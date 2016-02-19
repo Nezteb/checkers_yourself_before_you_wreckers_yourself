@@ -5,7 +5,7 @@
 // Compile and run with:
 //
 // Linux:
-//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time ./main.o 32 40 10 1
+//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 //
 // Mac: (need to figure out how to get support for OpenMP
 //     clang++ -Ofast --std=c++1y -msse2 -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time ./main.o 32 40 10 1
@@ -44,7 +44,10 @@ using std::ptr_fun;
 
 double sigmoid(double x)
 {
-    return tanh(x);
+    //return x;
+    //return x+100.0;
+    //return tanh(x);
+    return 1/(1+exp(-x)); // faster than tanh
 }
 
 int main(int argc, char *argv[])
@@ -92,7 +95,7 @@ int main(int argc, char *argv[])
         weights[i].setRandom();
     }
     
-    #endif
+    #endif // end DYNAMIC_MATRICES
     
     #ifdef STATIC_MATRICES
     
@@ -113,10 +116,11 @@ int main(int argc, char *argv[])
     Matrix<double, 1, 1> layer3; // 1x1
     layer3.setRandom();
     
-    #endif
+    #endif // end STATIC_MATRICES
 
-    #ifdef OUTPUT
+    #ifdef DYNAMIC_OUTPUT
 
+    #ifdef STATIC_MATRICES
     int j=0;
     for(int i=0; i<layers.size(); ++i)
     {
@@ -128,10 +132,12 @@ int main(int argc, char *argv[])
             ++j;
         }
     }
+    #endif // end STATIC_MATRICES
     
-    #endif
+    #endif // end DYNAMIC_OUTPUT
 
     int testCount = 1000000; // one million evaluations
+    //int testCount = 1;
     cout << "Testing " << testCount << " random sets of input (input size: " << inputs[0] << ") ..." << endl;
 
     for(int i=0; i<testCount; ++i)
@@ -149,11 +155,11 @@ int main(int argc, char *argv[])
             layers[j].noalias() = layers[j].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid to layer
         }
 
-        #ifdef OUTPUT
+        #ifdef DYNAMIC_OUTPUT
         cout << "OUTPUT: " << layers.back() << endl;
-        #endif
+        #endif // end DYNAMIC_OUTPUT
         
-        #endif
+        #endif // end DYNAMIC_MATRICES
         
         #ifdef STATIC_MATRICES
         
@@ -168,11 +174,11 @@ int main(int argc, char *argv[])
         layer3.noalias() = layer2 * weight2;
         layer3.noalias() = layer3.unaryExpr(ptr_fun(sigmoid));
         
-        #ifdef OUTPUT
-        cout << "OUTPUT: " << layers.back() << endl;
-        #endif
+        #ifdef STATIC_OUTPUT
+        cout << "OUTPUT: " << layer3 << endl;
+        #endif // end STATIC_OUTPUT
         
-        #endif
+        #endif // end STATIC_MATRICES
     }
 
     return 0;
