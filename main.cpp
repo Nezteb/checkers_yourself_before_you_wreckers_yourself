@@ -5,7 +5,7 @@
 // Compile and run with:
 //
 // Linux:
-//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
+//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time ./main.o 32 40 10 1
 //
 // Mac: (need to figure out how to get support for OpenMP
 //     clang++ -Ofast --std=c++1y -msse2 -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp -o main.o && time ./main.o 32 40 10 1
@@ -13,11 +13,18 @@
 // SSE2 and OpenMP may actually make things slower, but include them for now...
 // Still need to figure out how to get OpenMP working on Mac
 
+// This triggers the user of either dynamic or static matrices
+// Note that static matrices need to be manually tweaked
+#define STATIC_MATRICES
+
 // Eigen matrix includes
 #include "Eigen/Core"
 using Eigen::Matrix;
 using Eigen::RowMajor;
 using Eigen::Dynamic;
+using Eigen::initParallel;
+using Eigen::setNbThreads;
+using Eigen::nbThreads;
 
 typedef Matrix<double, Dynamic, Dynamic, RowMajor> MatrixXXd;
 
@@ -48,6 +55,12 @@ int main(int argc, char *argv[])
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
     }
     
+    // Initialize parallelization and check thread counts (only valid when fopenmp used)
+    initParallel();
+    setNbThreads(1024);
+    cout << "Using " << nbThreads() << " threads" << endl;
+    cout << endl;
+    
     vector<int> inputs;
     
     for(int i=1; i<argc; ++i) // first input is program name
@@ -61,6 +74,8 @@ int main(int argc, char *argv[])
         cout << "Layer " << i << ": " << inputs[i] << " nodes\n";
     }
     cout << endl;
+
+    #ifdef DYNAMIC_MATRICES
 
     vector<MatrixXXd> layers;
     vector<MatrixXXd> weights;
@@ -76,8 +91,33 @@ int main(int argc, char *argv[])
         weights.push_back( MatrixXXd(inputs[i], inputs[i+1]) );
         weights[i].setRandom();
     }
+    
+    #endif
+    
+    #ifdef STATIC_MATRICES
+    
+    Matrix<double, 1, 32, RowMajor> layer0; // 1x32
+    layer0.setRandom();
+    Matrix<double, 32, 40, RowMajor> weight0; // 32x40
+    weight0.setRandom();
+    Matrix<double, 1, 40, RowMajor> layer1; // 1x40
+    layer1.setRandom();
+    Matrix<double, 40, 10, RowMajor> weight1; // 40x10
+    weight1.setRandom();
+    Matrix<double, 1, 10, RowMajor> layer2; // 1x10
+    layer2.setRandom();
+    
+    // For matrices with 1 column, you can't specify RowMajor
+    Matrix<double, 10, 1> weight2; // 10x1
+    weight2.setRandom();
+    Matrix<double, 1, 1> layer3; // 1x1
+    layer3.setRandom();
+    
+    #endif
 
-    /*int j=0;
+    #ifdef OUTPUT
+
+    int j=0;
     for(int i=0; i<layers.size(); ++i)
     {
         cout << "Layer " << i << ": " << layers[i].rows() << "x" << layers[i].cols() << "\n\n" << layers[i] << "\n" << endl;
@@ -87,13 +127,17 @@ int main(int argc, char *argv[])
             cout << "Weight " << j << ": " << weights[j].rows() << "x" << weights[j].cols() << "\n\n" << weights[j] << "\n" << endl;
             ++j;
         }
-    }*/
+    }
+    
+    #endif
 
     int testCount = 1000000; // one million evaluations
     cout << "Testing " << testCount << " random sets of input (input size: " << inputs[0] << ") ..." << endl;
 
     for(int i=0; i<testCount; ++i)
     {
+        #ifdef DYNAMIC_MATRICES
+        
         layers[0].setRandom(); // randomize input layer
 
         for(int j=1; j<layers.size(); ++j) // go through all the layers
@@ -105,7 +149,30 @@ int main(int argc, char *argv[])
             layers[j].noalias() = layers[j].unaryExpr(ptr_fun(sigmoid)); // apply sigmoid to layer
         }
 
-        //cout << "OUTPUT: " << layers.back() << endl;
+        #ifdef OUTPUT
+        cout << "OUTPUT: " << layers.back() << endl;
+        #endif
+        
+        #endif
+        
+        #ifdef STATIC_MATRICES
+        
+        layer0.setRandom();
+        
+        layer1.noalias() = layer0 * weight0;
+        layer1.noalias() = layer1.unaryExpr(ptr_fun(sigmoid));
+        
+        layer2.noalias() = layer1 * weight1;
+        layer2.noalias() = layer2.unaryExpr(ptr_fun(sigmoid));
+        
+        layer3.noalias() = layer2 * weight2;
+        layer3.noalias() = layer3.unaryExpr(ptr_fun(sigmoid));
+        
+        #ifdef OUTPUT
+        cout << "OUTPUT: " << layers.back() << endl;
+        #endif
+        
+        #endif
     }
 
     return 0;

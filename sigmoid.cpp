@@ -3,7 +3,7 @@
 // CS 405
 
 // Compile and run with:
-// clang++ -Ofast --std=c++1y sigmoid.cpp -o sigmoid.o && ./sigmoid.o
+// clang++ -Ofast --std=c++1y sigmoid.cpp -o sigmoid.o && time ./sigmoid.o
 
 #include <cmath>
 using std::tanh;
@@ -14,8 +14,8 @@ int main()
     
     for(int i=0; i<100000000; ++i) // one hundred million
     {
-        x = tanh(x);
-        //x += 1;
+        //x = tanh(x);
+        x += 1;
     }
     return x;
 }
