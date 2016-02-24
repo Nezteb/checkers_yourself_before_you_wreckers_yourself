@@ -32,6 +32,11 @@ struct Node
     string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";
     float value = boardEval(board);
     vector<string> childNodes;
+    
+    /*Node(string name)
+    {
+        board = name;
+    }*/
 };
 
 /*int negaScout(node, depth, alpha, beta, color)
@@ -61,6 +66,14 @@ int main()
     return 0;
 }
 
+
+// https://en.wikipedia.org/wiki/Principal_variation_search
+// https://en.wikipedia.org/wiki/Negamax#Negamax_with_alpha_beta_pruning
+// http://stackoverflow.com/questions/18716465/implementing-alpha-beta-into-minimax
+// http://eric-yuan.me/alpha-beta-pruning/
+
+// Alpha beta explanation:      https://www.youtube.com/watch?v=xBXHtz4Gbdo
+// PVS explanation:             https://www.youtube.com/watch?v=1YdBLgmoV_E
 
 
 /*
