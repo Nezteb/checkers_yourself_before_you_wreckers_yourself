@@ -3,7 +3,7 @@
 // CS 405
 
 // Compile and run with:
-// clang++ -Ofast --std=c++1y evolution.cpp -o evolution.o && time ./evolution.o
+// clang++ -Ofast --std=c++1y evolution.cpp -o evolution.o && time ./evolution.o 32 40 10 1
 
 // Eigen matrix includes
 #include "Eigen/Core"
@@ -23,12 +23,17 @@ using std::vector;
 using std::cout;
 using std::endl;
 #include <cstdlib>
+using std::srand;
 using std::rand;
 #include <cassert>
 #include <cmath>
 using std::tanh;
 #include <functional>
 using std::ptr_fun;
+#include <random>
+using std::normal_distribution;
+
+
 
 class NeuralNetwork
 {
@@ -54,12 +59,34 @@ public:
         {
             _layers[j].noalias() = _layers[j-1] * _weights[j-1]; // next layer = previous layer * weights in between
 
-            _layers[j].noalias() = _layers[j].unaryExpr(_sigmoid); // apply sigmoid to layer
+            _layers[j].noalias() = _layers[j];//.unaryExpr(ptr_fun(_sigmoid)); // apply sigmoid to layer
         }
     }
     
+    NeuralNetwork spawnChild()
+    {
+        NeuralNetwork childNetwork(_topology);
+        
+        for(int i = 0; i < _weights.size(); ++i)
+        {
+            for(int row = 0; row < _weights[i].rows(); ++row)
+            {
+                for(int col = 0; col < _weights[i].cols(); ++col)
+                {
+                    // create new distirubtion based on weight and sigma
+                    normal_distribution<double> distribution(_weights[i](row,col), rand());
+                    
+                    // apply distribution to weight
+                    childNetwork._weights[i](row,col) = distribution(_weights[i](row,col));
+                }
+            }
+        }
+        
+        return childNetwork;
+    }
+    
 private:
-    double _sigmoid(double x)
+    static double _sigmoid(double x)
     {
         return 1/(1+exp(-x));
     }
@@ -77,6 +104,8 @@ int main(int argc, char *argv[])
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
     }
     
+    srand(time(NULL));
+    
     vector<int> inputs;
     
     for(int i=1; i<argc; ++i) // first input is program name
@@ -85,6 +114,8 @@ int main(int argc, char *argv[])
     }
     
     NeuralNetwork test(inputs);
+    
+    
     
     
     
