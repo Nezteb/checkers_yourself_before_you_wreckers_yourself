@@ -38,6 +38,12 @@ using std::normal_distribution;
 random_device seed;
 mt19937 superRandom(seed());
 
+double dRand(double dMin, double dMax)
+{
+    double d = (double)rand() / RAND_MAX;
+    return dMin + d * (dMax - dMin);
+}
+
 class NeuralNetwork
 {
 public:
@@ -77,7 +83,9 @@ public:
                 for(int col = 0; col < _weights[i].cols(); ++col)
                 {
                     // create new distirubtion based on weight and sigma
-                    normal_distribution<double> distribution(_weights[i](row,col), rand());
+                    double thingy = dRand(0.0,1.0);
+                    //cout << "THINGY: " << thingy << endl;
+                    normal_distribution<double> distribution(_weights[i](row,col), thingy);
 
                     // apply distribution to weight
                     childNetwork._weights[i](row,col) = distribution(superRandom);
@@ -88,7 +96,7 @@ public:
         return childNetwork;
     }
 
-private:
+//private:
     static double _sigmoid(double x)
     {
         return 1/(1+exp(-x));
@@ -117,10 +125,12 @@ int main(int argc, char *argv[])
     }
 
     NeuralNetwork test(inputs);
+    
+    cout << "PARENT WEIGHTS:\n" << test._weights[1] << endl;;
 
-
-
-
+    NeuralNetwork baby = test.spawnChild();
+    
+    cout << "CHILD WEIGHTS:\n" << baby._weights[1] << endl;
 
     return 0;
 }
