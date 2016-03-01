@@ -16,6 +16,7 @@
 // This triggers the user of either dynamic or static matrices
 // Note that static matrices need to be manually tweaked
 #define STATIC_MATRICES
+#define STATIC_OUTPUT
 
 // Eigen matrix includes
 #include "Eigen/Core"
