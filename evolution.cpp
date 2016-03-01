@@ -3,7 +3,12 @@
 // CS 405
 
 // Compile and run with:
-// clang++ -Ofast --std=c++1y evolution.cpp -o evolution.o && time ./evolution.o 32 40 10 1
+//
+// Linux:
+//     g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG evolution.cpp -o evolution.o && time OMP_NUM_THREADS=8 ./evolution.o 32 40 10 1
+//
+// Mac: (need to figure out how to get support for OpenMP
+//     clang++ -Ofast --std=c++1y -msse2 -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG evolution.cpp -o evolution.o && time ./evolution.o 32 40 10 1
 
 // Eigen matrix includes
 #include "Eigen/Core"
@@ -38,6 +43,7 @@ using std::normal_distribution;
 random_device seed;
 mt19937 superRandom(seed());
 
+// random double
 double dRand(double dMin, double dMax)
 {
     double d = (double)rand() / RAND_MAX;
@@ -49,6 +55,8 @@ class NeuralNetwork
 public:
     NeuralNetwork(vector<int> topology): _topology(topology)
     {
+        _kingValue = dRand(1.0,2.0);
+        
         for(int i=0; i<_topology.size(); ++i) // layers
         {
             _layers.push_back( MatrixXXd(1, _topology[i]) );
@@ -83,25 +91,43 @@ public:
                 for(int col = 0; col < _weights[i].cols(); ++col)
                 {
                     // create new distirubtion based on weight and sigma
-                    double thingy = dRand(0.0,1.0);
-                    //cout << "THINGY: " << thingy << endl;
-                    normal_distribution<double> distribution(_weights[i](row,col), thingy);
+                    normal_distribution<double> distribution(_weights[i](row,col), dRand(0.0, 1.0));
 
                     // apply distribution to weight
                     childNetwork._weights[i](row,col) = distribution(superRandom);
                 }
             }
         }
+        
+        // randomize king value slightly
+        normal_distribution<double> distribution(_kingValue, dRand(0.0, 1.0));
+        childNetwork._kingValue = distribution(superRandom);
 
         return childNetwork;
     }
-
-//private:
+    
+    void print()
+    {
+        int j = 0;
+        for(int i = 0; i < _layers.size(); ++i)
+        {
+            cout << "Layer " << i << ": " << _layers[i].rows() << "x" << _layers[i].cols() << "\n\n" << _layers[i] << "\n" << endl;
+            
+            if(j < _weights.size())
+            {
+                cout << "Weight " << j << ": " << _weights[j].rows() << "x" << _weights[j].cols() << "\n\n" << _weights[j] << "\n" << endl;
+                ++j;
+            }
+        }
+    }
+    
+private:
     static double _sigmoid(double x)
     {
         return 1/(1+exp(-x));
     }
 
+    double _kingValue;
     vector<int> _topology;
     vector<MatrixXXd> _layers;
     vector<MatrixXXd> _weights;
@@ -114,6 +140,11 @@ int main(int argc, char *argv[])
         cout << "INCORRECT USAGE\nProper Usage:\n\t"<< argv[0] << " inputLayer [otherLayers] outputLayer"
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
     }
+    
+    initParallel();
+    setNbThreads(1024);
+    cout << "Using " << nbThreads() << " threads" << endl;
+    cout << endl;
 
     srand(time(NULL));
 
@@ -126,11 +157,13 @@ int main(int argc, char *argv[])
 
     NeuralNetwork test(inputs);
     
-    cout << "PARENT WEIGHTS:\n" << test._weights[1] << endl;;
+    cout << "PARENT:" << endl;
+    test.print();
 
     NeuralNetwork baby = test.spawnChild();
     
-    cout << "CHILD WEIGHTS:\n" << baby._weights[1] << endl;
+    cout << "CHILD:" << endl;
+    baby.print();
 
     return 0;
 }
