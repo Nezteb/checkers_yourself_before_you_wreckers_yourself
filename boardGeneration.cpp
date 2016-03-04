@@ -5,6 +5,9 @@
 // Compile and run with:
 // clang++ -Ofast --std=c++1y boardGeneration.cpp -o boardGeneration.o && ./boardGeneration.o
 
+#ifndef BOARD_GENERATE
+#define BOARD_GENERATE
+
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -62,23 +65,6 @@ vector<int> movesBoard = {
             25, -1, -1, 24,
             26, -1, -1, 25,
             27, -1, -1, 26 };
-
-/*
-bool checkNearbySpace(const string &board, int space, int directionFromSpace, char piece)
-{
-
-}
-
-bool checkSpace(const string &board, int space, char piece)
-{
-    if(board[space] == piece)
-    {
-
-    }
-}
-*/
-
-//TODO: Red pieces to King conversions when they reach the end of the board
 
 vector<string> generateJumps(const string &currentBoard, int currentPieceIndex)
 {
@@ -349,16 +335,16 @@ vector<string> generateMoves(const string &currentBoard, vector<pair<int,char>> 
     return possibleMoves;
 }
 
-int main()
+vector<string> generateMovesHelper(string board)
 {
 
     //string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";     // regular board
     //string board = "______bBr_R_bbbB_____bB_________";     // to check jumps
     //string board = "______________r_b_b__Rr_bbb_____";     // red to king
-    string board = "_________R___bb______bb_________";     // king cycle (duplicate board?) //TODO
+    //string board = "_________R___bb______bb_________";     // king cycle (duplicate board?) //TODO
 
-    const char notKing = 'r';
-    const char king = 'R';
+    //const char notKing = 'r';
+    //const char king = 'R';
 
     // each int represents an index of the board string
     vector<pair<int,char>> redPieces;
@@ -366,28 +352,28 @@ int main()
     // Populate red pieces
     for(int i=0; i < board.size(); ++i)
     {
-        if(board[i] == notKing)
+        if(board[i] == 'r')
         {
-            redPieces.push_back(pair<int,char>(i, notKing));
+            redPieces.push_back(pair<int,char>(i, 'r'));
         }
-        else if(board[i] == king)
+        else if(board[i] == 'R')
         {
-            redPieces.push_back(pair<int,char>(i, king));
+            redPieces.push_back(pair<int,char>(i, 'R'));
         }
     }
 
     // Tuple debugging
-    /*for(int i=0; i < redPieces.size(); ++i)
-    {
-        cout << "tuple " << i << ": (" << redPieces[i].first << ", " << redPieces[i].second << ")" << endl;
-    }*/
+    //for(int i=0; i < redPieces.size(); ++i)
+    //{
+    //    cout << "tuple " << i << ": (" << redPieces[i].first << ", " << redPieces[i].second << ")" << endl;
+    //}
+    
+    //for(auto move: possibleMoves)
+    //{
+    //    cout << move << endl;
+    //}
 
-    vector<string> possibleMoves = generateMoves(board, redPieces);
-
-    for(auto move: possibleMoves)
-    {
-        cout << move << endl;
-    }
-
-    return 0;
+    return generateMoves(board, redPieces);
 }
+
+#endif

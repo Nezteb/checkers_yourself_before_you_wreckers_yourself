@@ -18,10 +18,14 @@ using std::unordered_map;
 using std::numeric_limits;
 #include <utility>
 using std::make_pair;
+#include <algorithm>
+using std::max;
 
-float INF = numeric_limits<float>::infinity();
+#include "boardGeneration.cpp"
 
-float boardEval(string board) // dummy function for now
+double INF = numeric_limits<double>::infinity();
+
+double boardEval(string board) // dummy function for now
 {
     srand (time(NULL));
     return rand();
@@ -29,52 +33,64 @@ float boardEval(string board) // dummy function for now
 
 struct Node
 {
-    string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";
-    float value = boardEval(board);
-    vector<string> childNodes;
-    
-    /*Node(string name)
+    Node(string newBoard)
     {
-        board = name;
-    }*/
+        board = newBoard;
+    }
+    
+    string board = "";
+    vector<Node> childNodes;
 };
 
-/*int negaScout(node, depth, alpha, beta, color)
-{
-    if()
-}*/
+double score;
 
-int main()
+double negaScout(Node &node, int depth, double alpha, double beta, int maximize)
 {
-    float alpha = -INF;
-    float beta = INF;
+    vector<string> boards = generateMovesHelper(node.board);
+    for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
+    {
+        node.childNodes.push_back(Node(boards[i]));
+    }
     
-    unordered_map<string,Node> tree;
+    if(node.childNodes.size() == 0 || depth == 0)
+    {
+        return maximize * boardEval(node.board);
+    }
     
-    tree["rrrrrrrrrrrr________bbbbbbbbbbbb"] = Node();
+    for(int i = 0; i < node.childNodes.size(); ++i) // for each child node
+    {
+        Node child = node.childNodes[i];
+        
+        if(i != 0) // not first child
+        {
+            score = -negaScout(child, depth-1, -alpha-1, -alpha, -maximize);
+            
+            if(alpha < score && score < beta)
+            {
+                score = -negaScout(child, depth-1, -beta, -score, -maximize);
+            }
+        }
+        else
+        {
+            score = -negaScout(child, depth-1, -beta, -alpha, -maximize);
+        }
+        
+        alpha = max(alpha, score);
+        if(alpha >= beta)
+        {
+            break;
+        }
+    }
     
-    cout << "tree['rrrrrrrrrrrr________bbbbbbbbbbbb'] is " << tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].value << endl;
-    
-    tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes = {"r","b"};
-    
-    // That will eventually look like this:
-    // tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes = generateBoards("rrrrrrrrrrrr________bbbbbbbbbbbb");
-    
-    cout << "tree['rrrrrrrrrrrr________bbbbbbbbbbbb'].childNodes[0] is " << tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes[0] << endl;
-    cout << "tree['rrrrrrrrrrrr________bbbbbbbbbbbb'].childNodes[1] is " << tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes[1] << endl;
-    
-    return 0;
+    return alpha;
 }
 
-
-// https://en.wikipedia.org/wiki/Principal_variation_search
-// https://en.wikipedia.org/wiki/Negamax#Negamax_with_alpha_beta_pruning
-// http://stackoverflow.com/questions/18716465/implementing-alpha-beta-into-minimax
-// http://eric-yuan.me/alpha-beta-pruning/
-
-// Alpha beta explanation:      https://www.youtube.com/watch?v=xBXHtz4Gbdo
-// PVS explanation:             https://www.youtube.com/watch?v=1YdBLgmoV_E
-
+string negaScoutHelper(Node &root, double alpha, double beta)
+{
+    
+    negaScout(root, 5, alpha, beta, 1);
+    return bestBoard;
+}
 
 /*
 (* Negascout is also termed Principal Variation Search - hence - pvs *)
@@ -94,3 +110,35 @@ function pvs(node, depth, α, β, color)
             break                                            (* beta cut-off *)
     return α
 */
+
+// https://en.wikipedia.org/wiki/Principal_variation_search
+// https://en.wikipedia.org/wiki/Negamax#Negamax_with_alpha_beta_pruning
+// http://stackoverflow.com/questions/18716465/implementing-alpha-beta-into-minimax
+// http://eric-yuan.me/alpha-beta-pruning/
+
+// Alpha beta explanation:      https://www.youtube.com/watch?v=xBXHtz4Gbdo
+// PVS explanation:             https://www.youtube.com/watch?v=1YdBLgmoV_E
+
+int main()
+{
+    double alpha = -INF;
+    double beta = INF;
+    
+    string startBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb";
+    Node root = Node(startBoard);
+
+    cout << "Best board: " << negaScout(root, alpha, beta);
+    
+    /*
+    unordered_map<string,Node> tree;
+    tree["rrrrrrrrrrrr________bbbbbbbbbbbb"] = Node();
+    cout << "tree['rrrrrrrrrrrr________bbbbbbbbbbbb'] is " << tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].value << endl;
+    tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes = {"r","b"};
+    // That will eventually look like this:
+    // tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes = generateBoards("rrrrrrrrrrrr________bbbbbbbbbbbb");
+    cout << "tree['rrrrrrrrrrrr________bbbbbbbbbbbb'].childNodes[0] is " << tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes[0] << endl;
+    cout << "tree['rrrrrrrrrrrr________bbbbbbbbbbbb'].childNodes[1] is " << tree["rrrrrrrrrrrr________bbbbbbbbbbbb"].childNodes[1] << endl;
+    */
+    
+    return 0;
+}
