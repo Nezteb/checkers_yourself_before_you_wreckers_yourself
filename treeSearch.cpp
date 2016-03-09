@@ -42,7 +42,7 @@ struct Node
     vector<Node> childNodes;
 };
 
-double score;
+
 
 double negaScout(Node &node, int depth, double alpha, double beta, int maximize)
 {
@@ -56,6 +56,8 @@ double negaScout(Node &node, int depth, double alpha, double beta, int maximize)
     {
         return maximize * boardEval(node.board);
     }
+    
+    double score;
     
     for(int i = 0; i < node.childNodes.size(); ++i) // for each child node
     {
@@ -87,9 +89,29 @@ double negaScout(Node &node, int depth, double alpha, double beta, int maximize)
 
 string negaScoutHelper(Node &root, double alpha, double beta)
 {
-    
-    negaScout(root, 5, alpha, beta, 1);
-    return bestBoard;
+    vector<string> boards = generateMovesHelper(root.board);
+    for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
+    {
+        root.childNodes.push_back(Node(boards[i]));
+    }
+
+    double bestScore = -INF;
+    int bestBoardIndex = 0;
+
+    for(int i = 0; i < root.childNodes.size(); ++i) // for each child node
+    {
+        Node child = root.childNodes[i];
+
+        double tempScore = negaScout(child, 5, alpha, beta, 1);
+
+        if(tempScore > bestScore)
+        {
+            bestScore = tempScore;
+            bestBoardIndex = i;
+        }
+    }
+
+    return root.childNodes[bestBoardIndex].board;
 }
 
 /*
@@ -127,7 +149,9 @@ int main()
     string startBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb";
     Node root = Node(startBoard);
 
-    cout << "Best board: " << negaScout(root, alpha, beta);
+    cout << "yay!" << endl;
+
+    cout << "Best board: " << negaScoutHelper(root, alpha, beta) << endl;
     
     /*
     unordered_map<string,Node> tree;
