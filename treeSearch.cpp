@@ -107,7 +107,7 @@ double negaScout(Node &currentNode, int depth, double alpha, double beta, int ma
     {
         return (double)maximize * currentNode.value;
     }
-    
+
     for(int i = 0; i < currentNode.childNodes.size(); ++i) // for each child node
     {
         child = &currentNode.childNodes[i];
