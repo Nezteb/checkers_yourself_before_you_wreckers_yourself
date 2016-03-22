@@ -55,6 +55,7 @@ class NeuralNetwork
 public:
     NeuralNetwork(vector<int> topology): _topology(topology)
     {
+        _performance = 0;
         _kingValue = dRand(1.0,2.0);
         
         for(int i=0; i<_topology.size(); ++i) // layers
@@ -131,6 +132,7 @@ private:
     vector<int> _topology;
     vector<MatrixXXd> _layers;
     vector<MatrixXXd> _weights;
+    int _performance;
 };
 
 int main(int argc, char *argv[])

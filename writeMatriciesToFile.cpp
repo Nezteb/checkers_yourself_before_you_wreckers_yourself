@@ -31,14 +31,14 @@ int main()
     
     for(int i = 0; i < 10; ++i)
     {
-        MatrixXf matrix = MatrixXf::Random(4,4);
+        MatrixXf matrix = MatrixXf::Random(40,40);
 
         ostringstream stringStream;
         stringStream << "saved_matrix_weights/matrix" << i << ".txt";
         string fileName = stringStream.str();
         
         cout << "\nAttempting to write to file: " << fileName << endl;
-        cout << matrix << endl;
+        //cout << matrix << endl;
         
         ofstream file(fileName, ofstream::out | ofstream::trunc);
 
@@ -88,9 +88,9 @@ int main()
                 }
             }
             
-            cout << "Matrix " << i << ":" << endl;
-            cout << "rows: " << rows << ", cols: " << cols << endl;
-            cout << matrix << endl;
+            //cout << "Matrix " << i << ":" << endl;
+            //cout << "rows: " << rows << ", cols: " << cols << endl;
+            //cout << matrix << endl;
             
             file.close();
         }
