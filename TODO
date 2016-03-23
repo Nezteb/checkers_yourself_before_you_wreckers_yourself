@@ -1,0 +1,28 @@
+TODO LIST:
+    - Create NeuralNetwork member function: saveWeights (see writeMatriciesToFile.cpp in test_code)
+    
+    - Create NeuralNetwork member function: generateBoards (see boardGeneration.cpp in test_code)
+    
+    - Create NeuralNetwork member function: treeSearch (see treeSearch.cpp in test_code)
+    
+    - Create NetworkGame derived class from Game (weights for network activity, calculates move, sends move, etc.)
+    
+    - Return chosen board move in tree search NegaScout instead of double (see treeSearch.cpp in test_code_
+    
+    - Implement Game class with functions (see gameplay.cpp in test_code)
+    
+    - Implement color swapping logic in Game class (see gameplay.cpp in test_code)
+    
+    - Figure out who won a game, modify performance score
+    
+    - Implement Tournament class with functions
+    
+    - Fix broken include paths (caused by repo restructure)
+
+----------
+Noah:
+    - asdf
+
+----------
+Lonny:
+    - asdf
