@@ -5,12 +5,44 @@
 // Compile and run with:
 // clang++ -Ofast --std=c++1y gameplay.cpp -o gameplay.o && time ./gameplay.o
 
-#include "evolution.cpp"
-#include "treeSearch.cpp"
+#include <iostream>
+using std::cout;
+using std::endl;
+
+#include <string>
+using std::string;
+
+//#include "evolution.cpp"
+//#include "treeSearch.cpp"
+
+#include <algorithm>
+using std::reverse;
+using std::replace;
+
+string invertBoard(string board)
+{
+    string tempBoard = board;
+    reverse(tempBoard.begin(), tempBoard.end());
+    
+    // need a temp character
+    replace(tempBoard.begin(), tempBoard.end(), 'r', 't' );
+    replace(tempBoard.begin(), tempBoard.end(), 'R', 'T' );
+    
+    replace(tempBoard.begin(), tempBoard.end(), 'b', 'r' );
+    replace(tempBoard.begin(), tempBoard.end(), 'B', 'R' );
+    
+    replace(tempBoard.begin(), tempBoard.end(), 't', 'b' );
+    replace(tempBoard.begin(), tempBoard.end(), 'T', 'B' );
+    
+    return tempBoard;
+}
+
+/*
+
 
 void writeGameHistoryToFile(const vector<string> & gameHistory)
 {
-    string fileName = "gameHistory1.txt"
+    string fileName = "testGameHistory/gameHistory1.txt"
     ofstream file(fileName, ofstream::out | ofstream::trunc);
 
     if (file.is_open())
@@ -32,7 +64,6 @@ void gameplay(NeuralNetwork & nn1, NeuralNetwork & nn2)
     bool redPlayerTurn = true;
     vector<string> gameHistory;
     string currentBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb";
-    
     
     while (!win || turns <= 100)
     {
@@ -73,4 +104,23 @@ void tournament(vector<NeuralNetwork> NNs)
             }
         }
     }
+}
+
+*/
+
+int main()
+{
+    string board = "bbb___rrRbB___brbrbrbRBRRBrbrb";
+    string reverse = invertBoard(board);
+    cout << board << "\nbecomes:\n" << reverse << endl;
+    
+    /*NeuralNetwork nn1;
+    NeuralNetwork nn2;
+    gameplay(nn1, nn2);
+    cout << "NN1 Performance: " << nn1._performance << endl;
+    cout << "NN2 Performance: " << nn2._performance << endl;*/
+    
+    
+    
+    return 0;
 }
