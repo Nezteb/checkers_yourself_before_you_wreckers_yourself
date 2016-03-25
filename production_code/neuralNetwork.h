@@ -10,6 +10,8 @@
 
 #include <vector>
 using std::vector;
+#include <string>
+using std::string;
 
 // Eigen matrix includes
 #include "../third_party/Eigen/Core"
@@ -26,6 +28,8 @@ public:
     void feedForward();
     NeuralNetwork spawnChild();
     void print();
+    MatrixXXd readWeightFromFile(const string subdirectory, string weightFilename);
+    void writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename);
     
 private:
     static double _sigmoid(double x);

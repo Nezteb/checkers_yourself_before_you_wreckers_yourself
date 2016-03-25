@@ -12,6 +12,7 @@
 using Eigen::Matrix;
 using Eigen::RowMajor;
 using Eigen::Dynamic;
+using Eigen::IOFormat;
 using Eigen::initParallel;
 using Eigen::setNbThreads;
 using Eigen::nbThreads;
@@ -35,6 +36,15 @@ using std::ptr_fun;
 using std::random_device;
 using std::mt19937;
 using std::normal_distribution;
+#include <string>
+using std::string;
+#include <sstream>
+using std::ostringstream;
+#include <fstream>
+using std::ifstream;
+using std::ofstream;
+#include <sys/stat.h> // for mkdir
+#include <sys/types.h>
 
 random_device seed;
 mt19937 superRandom(seed());
@@ -118,4 +128,101 @@ void NeuralNetwork::print()
 double NeuralNetwork::_sigmoid(double x)
 {
     return 1/(1+exp(-x));
+}
+
+IOFormat CSV(Eigen::StreamPrecision, Eigen::DontAlignCols, ",", ",", "", "", "", "");
+
+MatrixXXd NeuralNetwork::readWeightFromFile(const string subdirectory, string weightFilename)
+{
+    struct stat info;
+
+    if(stat(subdirectory.c_str(), &info) != 0)
+    {
+        cout << "Cannot access: " << subdirectory << endl;
+    }
+    else if(!(info.st_mode & S_IFDIR))
+    {
+        cout << subdirectory << " is not a directory." << endl;
+    }
+    
+    ostringstream stringStream;
+    stringStream << subdirectory << "/" << weightFilename << ".txt";
+    string fileName = stringStream.str();
+    
+    cout << "\nAttempting to read from file: " << fileName << endl;
+    
+    ifstream file(fileName, ifstream::in);
+    
+    string rowsString;
+    string colsString;
+    int rows;
+    int cols;
+    string tempString;
+    
+    MatrixXXd *pointer ;
+    
+    if (file.is_open())
+    {
+        getline(file, rowsString);
+        getline(file, colsString);
+        rows = stoi(rowsString);
+        cols = stoi(colsString);
+        
+        MatrixXXd matrix(rows, cols);
+        pointer = &matrix;
+        
+        for(int j = 0; j < rows; ++j)
+        {
+            for(int k = 0; k < cols; ++k)
+            {
+                getline(file, tempString, ',');
+                matrix(j, k) = stof(tempString);
+            }
+        }
+        
+        file.close();
+        return matrix;
+    }
+    else
+    {
+        cout << "Could not open: " << fileName << endl;
+    }
+}
+
+void NeuralNetwork::writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename)
+{
+    struct stat info;
+
+    if(stat(subdirectory.c_str(), &info) != 0)
+    {
+        cout << "Cannot access: " << subdirectory << endl;
+    }
+    else if(!(info.st_mode & S_IFDIR))
+    {
+        cout << subdirectory << " is not a directory." << endl;
+    }
+    
+    // make the directory if it doesn't already exist
+    const int dir_err = mkdir(subdirectory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+    ostringstream stringStream;
+    stringStream << subdirectory << "/" << weightFilename << ".txt";
+    string fileName = stringStream.str();
+    
+    cout << "\nAttempting to write to file: " << fileName << endl;
+    
+    ofstream file(fileName, ofstream::out | ofstream::trunc);
+
+    if (file.is_open())
+    {
+        file << weight.rows() << "\n";
+        file << weight.cols() << "\n";
+        file << weight.format(CSV);
+        
+        file.close();
+    }
+    else
+    {
+        cout << "Could not open: " << fileName << endl;
+    }
 }
