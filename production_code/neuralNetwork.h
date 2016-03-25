@@ -12,6 +12,8 @@
 using std::vector;
 #include <string>
 using std::string;
+#include <utility>
+using std::pair;
 
 // Eigen matrix includes
 #include "../third_party/Eigen/Core"
@@ -30,9 +32,12 @@ public:
     void print();
     MatrixXXd readWeightFromFile(const string subdirectory, string weightFilename);
     void writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename);
+    vector<string> generateMoves(string board);
     
 private:
     static double _sigmoid(double x);
+    vector<string> generateJumps(const string &currentBoard, int currentPieceIndex);
+    vector<string> generateMovesHelper(const string &currentBoard, vector<pair<int,char>> &redPieces);
 
     double _kingValue;
     vector<int> _topology;
