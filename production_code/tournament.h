@@ -2,8 +2,7 @@
 // Noah Betzen & Lonny Strunk
 // CS 405
 
-// Compile and run with:
-// clang++ -Ofast --std=c++1y tournament.cpp -o tournament.o && ./tournament.o
+// Compile main.cpp for this project
 
 #ifndef TOURNAMENT_H
 #define TOURNAMENT_H

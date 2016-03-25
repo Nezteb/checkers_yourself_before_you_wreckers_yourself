@@ -2,8 +2,7 @@
 // Noah Betzen & Lonny Strunk
 // CS 405
 
-// Compile and run with:
-// clang++ -Ofast --std=c++1y neuralNetwork.cpp -o neuralNetwork.o && ./neuralNetwork.o
+// Compile main.cpp for this project
 
 #ifndef NEURALNETWORK_H
 #define NEURALNETWORK_H
@@ -23,6 +22,8 @@ using Eigen::Dynamic;
 
 typedef Matrix<double, Dynamic, Dynamic, RowMajor> MatrixXXd;
 
+struct Node; // forward declaration
+
 class NeuralNetwork
 {
 public:
@@ -30,20 +31,23 @@ public:
     void feedForward();
     NeuralNetwork spawnChild();
     void print();
+    double evaluateBoard(const string &board);
     MatrixXXd readWeightFromFile(const string subdirectory, string weightFilename);
     void writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename);
     vector<string> generateMoves(string board);
+    string treeSearch(string rootBoard);
     
+    int _performance;
 private:
     static double _sigmoid(double x);
     vector<string> generateJumps(const string &currentBoard, int currentPieceIndex);
     vector<string> generateMovesHelper(const string &currentBoard, vector<pair<int,char>> &redPieces);
+    double negaScout(Node &currentNode, int depth, double alpha, double beta);
 
     double _kingValue;
     vector<int> _topology;
     vector<MatrixXXd> _layers;
     vector<MatrixXXd> _weights;
-    int _performance;
 };
 
 #endif

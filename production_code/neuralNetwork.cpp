@@ -2,8 +2,7 @@
 // Noah Betzen & Lonny Strunk
 // CS 405
 
-// Compile and run with:
-// clang++ -Ofast --std=c++1y neuralNetwork.cpp -o neuralNetwork.o && ./neuralNetwork.o
+// Compile main.cpp for this project
 
 #include "neuralNetwork.h"
 
@@ -51,6 +50,66 @@ using std::sort;
 using std::unique;
 #include <utility>
 using std::pair;
+#include <limits>
+using std::numeric_limits;
+#include <algorithm>
+using std::max;
+
+
+double INF = numeric_limits<double>::infinity();
+
+struct Node
+{
+    Node(string newBoard)
+    {
+        board = newBoard;
+        parentNode = NULL;
+    }
+    
+    void createChild(string newBoard)
+    {
+        Node temp(newBoard);
+        temp.parentNode = this;
+        childNodes.push_back(temp);
+    }
+    
+    string board;
+    
+    Node *parentNode;
+    vector<Node> childNodes;
+    
+    void printTree(const string &tab = "", const bool last = true)
+    {
+        cout << tab;
+        
+        if(last)
+            cout << "└";
+        else
+            cout << "├";
+            
+        cout << "─";
+        
+        if(childNodes.size() > 0)
+            cout << "┬";
+        else
+            cout << "─";
+        
+        cout << "B: " << board << /*" V: " << value << " A: " << alpha << " B: " << beta <<*/ endl;
+        
+        for(int i = 0; i < childNodes.size(); ++i)
+        {
+            string newTab;
+            
+            if(last)
+                newTab="  ";
+            else
+                newTab="│ ";
+            
+            childNodes[i].printTree(tab + newTab, i + 1 == childNodes.size());
+        }
+    }
+};
+
 
 random_device seed;
 mt19937 superRandom(seed());
@@ -115,6 +174,44 @@ NeuralNetwork NeuralNetwork::spawnChild()
 
     return childNetwork;
 }
+
+double NeuralNetwork::evaluateBoard(const string &board)
+{
+    // iterate through all 32 characters of board, assign values to a 32x1 matrix
+    // _layers[0] is input layer
+    for(int i = 0; i < board.size(); ++i)
+    {
+        switch(board[i])
+        {
+            case 'r':
+                _layers[0](i, 0) = -1.0;
+                break;
+            case 'R':
+                _layers[0](i, 0) = _kingValue;
+                break;
+            case 'b':
+                _layers[0](i, 0) = 1.0;
+                break;
+            case 'B':
+                _layers[0](i, 0) = -_kingValue;
+                break;
+            case '_':
+                _layers[0](i, 0) = 0.0;
+                break;
+        }
+    }
+    
+    for(int j=1; j<_layers.size(); ++j) // go through all the layers
+    {
+        // TODO: this is the slowest portion
+        _layers[j].noalias() = _layers[j-1] * _weights[j-1]; // next layer = previous layer * weights in between
+
+        // TODO: faster way to do unary expressions?
+        _layers[j].noalias() = _layers[j].unaryExpr(ptr_fun(_sigmoid)); // apply sigmoid to layer
+    }
+    
+    return (_layers.back())(0,0); // get first element of 1x1 matrix
+}
     
 void NeuralNetwork::print()
 {
@@ -130,7 +227,7 @@ void NeuralNetwork::print()
         }
     }
 }
-    
+
 double NeuralNetwork::_sigmoid(double x)
 {
     return 1/(1+exp(-x));
@@ -586,4 +683,116 @@ vector<string> NeuralNetwork::generateMoves(string board)
     //}
 
     return generateMovesHelper(board, redPieces);
+}
+
+double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, double beta)
+{
+    Node *child;
+    double temp;
+    
+    vector<string> boards = generateMoves(currentNode.board);
+    for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
+    {
+        currentNode.createChild(boards[i]);
+    }
+    
+    // if we are a leaf or have reached our max depth
+    if(currentNode.childNodes.size() == 0 || depth == 0)
+    {
+        return evaluateBoard(currentNode.board);
+    }
+
+    for(int i = 0; i < currentNode.childNodes.size(); ++i) // for each child node
+    {
+        child = &currentNode.childNodes[i];
+        
+        if(i != 0) // not first child
+        {
+            // -alpha-1.0 == -(alpha + 1.0) == -beta 
+            // scout window
+            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha);
+            
+            // if we're still between alpha and beta
+            if(alpha < temp && temp < beta)
+            {
+                // do a research
+                temp = -negaScout(*child, depth-1, -beta, -temp);
+            }
+        }
+        else // is first child
+        {
+            temp = -negaScout(*child, depth-1, -beta, -alpha);
+        }
+        
+        alpha = max(alpha, temp);
+        
+        if(alpha >= beta)
+        {
+            break; // prune
+        }
+    }
+
+    return alpha;
+}
+
+string NeuralNetwork::treeSearch(string rootBoard)
+{
+    double alpha = -INF;
+    double beta = INF;
+    int depth = 2;
+    string bestBoard = "";
+    double temp;
+    Node *child;
+
+    Node root = Node(rootBoard);
+
+    vector<string> boards = generateMoves(root.board);
+    for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
+    {
+        root.createChild(boards[i]);
+    }
+
+    // if we are a leaf or have reached our max depth
+    if(root.childNodes.size() == 0 || depth == 0)
+    {
+        return root.board;
+        //return evaluateBoard(root.board);
+    }
+
+    for(int i = 0; i < root.childNodes.size(); ++i) // for each child node
+    {
+        child = &root.childNodes[i];
+        
+        if(i != 0) // not first child
+        {
+            // -alpha-1.0 == -(alpha + 1.0) == -beta 
+            // scout window
+            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha);
+            
+            // if we're still between alpha and beta
+            if(alpha < temp && temp < beta)
+            {
+                // do a research
+                temp = -negaScout(*child, depth-1, -beta, -temp);
+            }
+        }
+        else // is first child
+        {
+            temp = -negaScout(*child, depth-1, -beta, -alpha);
+        }
+        
+        //alpha = max(alpha, temp);
+        if(temp > alpha)
+        {
+            alpha = temp;
+            bestBoard = child->board; //save best board
+        }
+        
+        if(alpha >= beta)
+        {
+            break; // prune
+        }
+    }
+
+    return bestBoard;
 }

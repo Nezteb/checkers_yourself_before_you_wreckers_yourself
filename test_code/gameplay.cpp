@@ -37,9 +37,6 @@ string invertBoard(string board)
     return tempBoard;
 }
 
-/*
-
-
 void writeGameHistoryToFile(const vector<string> & gameHistory)
 {
     string fileName = "testGameHistory/gameHistory1.txt"
@@ -105,8 +102,6 @@ void tournament(vector<NeuralNetwork> NNs)
         }
     }
 }
-
-*/
 
 int main()
 {
