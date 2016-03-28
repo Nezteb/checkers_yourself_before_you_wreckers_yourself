@@ -22,22 +22,13 @@ using std::ofstream;
 #include <sys/stat.h> // for mkdir
 #include <sys/types.h>
 
-string Game::invertBoard(string board)
+Game::Game(NeuralNetwork &redPlayer, NeuralNetwork &blackPlayer)
 {
-    string tempBoard = board;
-    reverse(tempBoard.begin(), tempBoard.end());
+    _redPlayerPtr = &redPlayer;
+    _blackPlayerPtr = &blackPlayer;
     
-    // need a temp character
-    replace(tempBoard.begin(), tempBoard.end(), 'r', 't' );
-    replace(tempBoard.begin(), tempBoard.end(), 'R', 'T' );
-    
-    replace(tempBoard.begin(), tempBoard.end(), 'b', 'r' );
-    replace(tempBoard.begin(), tempBoard.end(), 'B', 'R' );
-    
-    replace(tempBoard.begin(), tempBoard.end(), 't', 'b' );
-    replace(tempBoard.begin(), tempBoard.end(), 'T', 'B' );
-    
-    return tempBoard;
+    _redPlayerPtr->_isRed = true;
+    _blackPlayerPtr->_isRed = false;
 }
 
 void Game::writeGameHistoryToFile(const string subdirectory, string weightFilename)
@@ -82,30 +73,47 @@ void Game::gameLoop()
 {
     string win = "";
     int turns = 0;
-    bool redPlayerTurn = true;
-    _currentBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb";
+    bool redPlayerTurn = true; // red goes first
+    _currentBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb"; // starting board
     
     while (win == "" || turns <= 100)
     {
+        if(redPlayerTurn)
+        {
+            _currentBoard = _redPlayerPtr->treeSearch(_currentBoard, 4);
+            if(_currentBoard == "" || turns >= 100)
+            {
+                win = "black";
+            }
+        }
+        else
+        {
+            _currentBoard = _blackPlayerPtr->treeSearch(_currentBoard, 4);
+            if(_currentBoard == "" || turns >= 100)
+            {
+                win = "red";
+            }
+        }
+        
         _gameHistory.push_back(_currentBoard);
-        //_currentBoard = treeSearch(redPlayerTurn, _redPlayer);
         redPlayerTurn = !redPlayerTurn;
         ++turns;
     }
+    
     if(win == "red")
     {
-        _redPlayer._performance += 1;
-        _blackPlayer._performance -= 2;
+        _redPlayerPtr->_performance += 1;
+        _blackPlayerPtr->_performance -= 2;
     }
     else if(win == "black")
     {
-        _redPlayer._performance -= 2;
-        _blackPlayer._performance += 1;
+        _redPlayerPtr->_performance -= 2;
+        _blackPlayerPtr->_performance += 1;
     }
     else
     {
-        _redPlayer._performance -= 1;
-        _blackPlayer._performance -= 1;
+        _redPlayerPtr->_performance -= 1;
+        _blackPlayerPtr->_performance -= 1;
     }
     
     writeGameHistoryToFile("gameHistories", "game");

@@ -55,7 +55,6 @@ using std::numeric_limits;
 #include <algorithm>
 using std::max;
 
-
 double INF = numeric_limits<double>::infinity();
 
 struct Node
@@ -107,6 +106,12 @@ struct Node
             
             childNodes[i].printTree(tab + newTab, i + 1 == childNodes.size());
         }
+    }
+    
+    ~Node()
+    {
+        parentNode = NULL;
+        
     }
 };
 
@@ -685,14 +690,47 @@ vector<string> NeuralNetwork::generateMoves(string board)
     return generateMovesHelper(board, redPieces);
 }
 
-double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, double beta)
+string NeuralNetwork::invertBoard(string board)
+{
+    string tempBoard = board;
+    reverse(tempBoard.begin(), tempBoard.end());
+    
+    // need a temp character
+    replace(tempBoard.begin(), tempBoard.end(), 'r', 't' );
+    replace(tempBoard.begin(), tempBoard.end(), 'R', 'T' );
+    
+    replace(tempBoard.begin(), tempBoard.end(), 'b', 'r' );
+    replace(tempBoard.begin(), tempBoard.end(), 'B', 'R' );
+    
+    replace(tempBoard.begin(), tempBoard.end(), 't', 'b' );
+    replace(tempBoard.begin(), tempBoard.end(), 'T', 'B' );
+    
+    return tempBoard;
+}
+
+double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, double beta, bool isRed)
 {
     Node *child;
     double temp;
     
+    if(!isRed) // if black
+    {
+        currentNode.board = invertBoard(currentNode.board);
+    }
+    
     vector<string> boards = generateMoves(currentNode.board);
+    
+    if(!isRed) // if black
+    {
+        for(auto &board : boards)
+        {
+            board = invertBoard(board);
+        }
+    }
+    
     for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
     {
+        // SORT BOARDS/NODES HERE BEFORE ADDING THEM TO THE TREE
         currentNode.createChild(boards[i]);
     }
     
@@ -710,18 +748,18 @@ double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, doub
         {
             // -alpha-1.0 == -(alpha + 1.0) == -beta 
             // scout window
-            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha);
+            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha, !isRed);
             
             // if we're still between alpha and beta
             if(alpha < temp && temp < beta)
             {
                 // do a research
-                temp = -negaScout(*child, depth-1, -beta, -temp);
+                temp = -negaScout(*child, depth-1, -beta, -temp, !isRed);
             }
         }
         else // is first child
         {
-            temp = -negaScout(*child, depth-1, -beta, -alpha);
+            temp = -negaScout(*child, depth-1, -beta, -alpha, !isRed);
         }
         
         alpha = max(alpha, temp);
@@ -735,18 +773,32 @@ double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, doub
     return alpha;
 }
 
-string NeuralNetwork::treeSearch(string rootBoard)
+string NeuralNetwork::treeSearch(string rootBoard, int depth) // called once
 {
     double alpha = -INF;
     double beta = INF;
-    int depth = 2;
     string bestBoard = "";
     double temp;
     Node *child;
+    bool isRed = _isRed;
 
     Node root = Node(rootBoard);
 
+    if(!isRed) // if black
+    {
+        root.board = invertBoard(root.board);
+    }
+
     vector<string> boards = generateMoves(root.board);
+    
+    if(!isRed) // if black
+    {
+        for(auto &board : boards)
+        {
+            board = invertBoard(board);
+        }
+    }
+    
     for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
     {
         root.createChild(boards[i]);
@@ -767,18 +819,18 @@ string NeuralNetwork::treeSearch(string rootBoard)
         {
             // -alpha-1.0 == -(alpha + 1.0) == -beta 
             // scout window
-            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha);
+            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha, !isRed);
             
             // if we're still between alpha and beta
             if(alpha < temp && temp < beta)
             {
                 // do a research
-                temp = -negaScout(*child, depth-1, -beta, -temp);
+                temp = -negaScout(*child, depth-1, -beta, -temp, !isRed);
             }
         }
         else // is first child
         {
-            temp = -negaScout(*child, depth-1, -beta, -alpha);
+            temp = -negaScout(*child, depth-1, -beta, -alpha, !isRed);
         }
         
         //alpha = max(alpha, temp);

@@ -15,14 +15,15 @@ using std::string;
 class Game
 {
 public:
+    Game(NeuralNetwork &redPlayer, NeuralNetwork &blackPlayer);
     void gameLoop();
 
 private:
     void writeGameHistoryToFile(const string subdirectory, string weightFilename);
     string invertBoard(string board);
 
-    NeuralNetwork _redPlayer;
-    NeuralNetwork _blackPlayer;
+    NeuralNetwork *_redPlayerPtr;
+    NeuralNetwork *_blackPlayerPtr;
     string _currentBoard;
     vector<string> _gameHistory;
 };

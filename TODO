@@ -6,8 +6,6 @@ TODO LIST:
     
     - Implement Tournament class with functions
     
-    - Board evluation needs to go inside NeuralNetwork class
-
     - Store NeuralNetworks as C++11 std::array (in tournament) http://stackoverflow.com/a/11134514
 
 ----------
@@ -18,9 +16,7 @@ Noah:
 
 ----------
 Lonny:
-    - Return chosen board move in tree search NegaScout instead of double (see treeSearch.cpp in test_code)
-    
-    - Create NeuralNetwork member function: treeSearch (see treeSearch.cpp in test_code)
+
 
 ----------
 DONE:
@@ -29,3 +25,9 @@ DONE:
     - Create NeuralNetwork member function: generateBoards (see boardGeneration.cpp in test_code)
     
     - Implement Game class with functions (see gameplay.cpp in test_code)
+    
+    - Return chosen board move in tree search NegaScout instead of double (see treeSearch.cpp in test_code)
+    
+    - Create NeuralNetwork member function: treeSearch (see treeSearch.cpp in test_code)
+    
+    - Board evluation needs to go inside NeuralNetwork class

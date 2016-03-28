@@ -41,14 +41,21 @@ int main(int argc, char *argv[])
     }
 
     NeuralNetwork test(inputs);
+    test._isRed = true;
     
-    cout << "PARENT:" << endl;
-    test.print();
+    cout << "NormalBoard best move:" << endl;
+    //cout << test.evaluateBoard("rrrrrrrrrrrr________bbbbbbbbbbbb") << endl;
+    
+    // starts segfaulting at 7
+    cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 2) << endl;
+    
+    // cout << "PARENT:" << endl;
+    // test.print();
 
-    NeuralNetwork baby = test.spawnChild();
+    // NeuralNetwork baby = test.spawnChild();
     
-    cout << "CHILD:" << endl;
-    baby.print();
+    // cout << "CHILD:" << endl;
+    // baby.print();
     
     return 0;
 }
