@@ -192,19 +192,19 @@ double NeuralNetwork::evaluateBoard(const string &board)
         switch(board[i])
         {
             case 'r':
-                _layers[0](i, 0) = -1.0;
+                _layers[0](0, i) = -1.0;
                 break;
             case 'R':
-                _layers[0](i, 0) = _kingValue;
+                _layers[0](0, i) = _kingValue;
                 break;
             case 'b':
-                _layers[0](i, 0) = 1.0;
+                _layers[0](0, i) = 1.0;
                 break;
             case 'B':
-                _layers[0](i, 0) = -_kingValue;
+                _layers[0](0, i) = -_kingValue;
                 break;
             case '_':
-                _layers[0](i, 0) = 0.0;
+                _layers[0](0, i) = 0.0;
                 break;
         }
     }
@@ -297,6 +297,7 @@ MatrixXXd NeuralNetwork::readWeightFromFile(const string subdirectory, string we
     else
     {
         cout << "Could not open: " << fileName << endl;
+        return MatrixXXd();
     }
 }
 
@@ -402,11 +403,11 @@ vector<string> NeuralNetwork::generateJumps(const string &currentBoard, int curr
         southEast = movesBoard[currentPieceIndex * 4 + SE];
         southWest = movesBoard[currentPieceIndex * 4 + SW];
 
-        if (currentBoard[southEast] == 'b' || currentBoard[southEast] == 'B')
+        if (southEast >= 0 && (currentBoard[southEast] == 'b' || currentBoard[southEast] == 'B'))
         {
             nextSouthEast = movesBoard[southEast * 4 + SE];
 
-            if(currentBoard[nextSouthEast] == '_')
+            if(nextSouthEast >= 0 && currentBoard[nextSouthEast] == '_')
             {
                 tempBoard = currentBoard;
                 tempBoard[southEast] = '_';
@@ -417,7 +418,8 @@ vector<string> NeuralNetwork::generateJumps(const string &currentBoard, int curr
                 {
                     tempBoard[nextSouthEast] = 'R';
                     tempJumps.push_back(tempBoard);
-                } else
+                }
+                else
                 {
                     tempJumps = generateJumps(tempBoard, nextSouthEast);
                 }
@@ -425,11 +427,11 @@ vector<string> NeuralNetwork::generateJumps(const string &currentBoard, int curr
                 possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
             }
         }
-        if (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B')
+        if (southWest >= 0 && (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B'))
         {
             nextSouthWest = movesBoard[southWest * 4 + SW];
 
-            if(currentBoard[nextSouthWest] == '_')
+            if(nextSouthWest >= 0 && currentBoard[nextSouthWest] == '_')
             {
                 tempBoard = currentBoard;
                 tempBoard[southWest] = '_';
@@ -440,7 +442,8 @@ vector<string> NeuralNetwork::generateJumps(const string &currentBoard, int curr
                 {
                     tempBoard[nextSouthWest] = 'R';
                     tempJumps.push_back(tempBoard);
-                } else
+                }
+                else
                 {
                     tempJumps = generateJumps(tempBoard, nextSouthWest);
                 }
@@ -454,11 +457,11 @@ vector<string> NeuralNetwork::generateJumps(const string &currentBoard, int curr
         northEast = movesBoard[currentPieceIndex * 4 + NE];
         northWest = movesBoard[currentPieceIndex * 4 + NW];
 
-        if (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B')
+        if (northEast >= 0 && (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B'))
         {
             nextNorthEast = movesBoard[northEast * 4 + NE];
 
-            if(currentBoard[nextNorthEast] == '_')
+            if(nextNorthEast >= 0 && currentBoard[nextNorthEast] == '_')
             {
                 tempBoard = currentBoard;
                 tempBoard[northEast] = '_';
@@ -468,11 +471,11 @@ vector<string> NeuralNetwork::generateJumps(const string &currentBoard, int curr
                 possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
             }
         }
-        if (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B')
+        if (northWest >= 0 && (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B'))
         {
             nextNorthWest = movesBoard[northWest * 4 + NW];
 
-            if(currentBoard[nextNorthWest] == '_')
+            if(nextNorthWest >= 0 && currentBoard[nextNorthWest] == '_')
             {
                 tempBoard = currentBoard;
                 tempBoard[northWest] = '_';
@@ -516,11 +519,11 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
             southEast = movesBoard[redPieces[i].first * 4 + SE];
             southWest = movesBoard[redPieces[i].first * 4 + SW];
 
-            if (currentBoard[southEast] == 'b' || currentBoard[southEast] == 'B')
+            if (southEast >= 0 && (currentBoard[southEast] == 'b' || currentBoard[southEast] == 'B'))
             {
                 nextSouthEast = movesBoard[southEast * 4 + SE];
 
-                if(currentBoard[nextSouthEast] == '_')
+                if(nextSouthEast >= 0 && currentBoard[nextSouthEast] == '_')
                 {
                     tempBoard = currentBoard;
                     tempBoard[southEast] = '_';
@@ -531,7 +534,8 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
                     {
                         tempBoard[nextSouthEast] = 'R';
                         tempJumps.push_back(tempBoard);
-                    } else
+                    }
+                    else
                     {
                         tempJumps = generateJumps(tempBoard, nextSouthEast);
                     }
@@ -539,11 +543,11 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
                     possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
                 }
             }
-            if (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B')
+            if (southWest >= 0 && (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B'))
             {
                 nextSouthWest = movesBoard[southWest * 4 + SW];
 
-                if(currentBoard[nextSouthWest] == '_')
+                if(nextSouthWest >= 0 && currentBoard[nextSouthWest] == '_')
                 {
                     tempBoard = currentBoard;
                     tempBoard[southWest] = '_';
@@ -564,7 +568,7 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
             }
             if (possibleJumps.empty())
             {
-                if (currentBoard[southEast] == '_')
+                if (southEast >= 0 && currentBoard[southEast] == '_')
                 {
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[southEast]);
@@ -576,7 +580,7 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
 
                     possibleMoves.push_back(tempBoard);
                 }
-                if (currentBoard[southWest] == '_')
+                if (southWest >= 0 && currentBoard[southWest] == '_')
                 {
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[southWest]);
@@ -595,11 +599,11 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
             northEast = movesBoard[redPieces[i].first * 4 + NE];
             northWest = movesBoard[redPieces[i].first * 4 + NW];
 
-            if (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B')
+            if (northEast >= 0 && (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B'))
             {
                 nextNorthEast = movesBoard[northEast * 4 + NE];
 
-                if(currentBoard[nextNorthEast] == '_')
+                if(nextNorthEast >= 0 && currentBoard[nextNorthEast] == '_')
                 {
                     tempBoard = currentBoard;
                     tempBoard[northEast] = '_';
@@ -609,11 +613,11 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
                     possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
                 }
             }
-            if (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B')
+            if (northWest >= 0 && (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B'))
             {
                 nextNorthWest = movesBoard[northWest * 4 + NW];
 
-                if(currentBoard[nextNorthWest] == '_')
+                if(nextNorthWest >= 0 && currentBoard[nextNorthWest] == '_')
                 {
                     tempBoard = currentBoard;
                     tempBoard[northWest] = '_';
@@ -625,13 +629,13 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
             }
             if(possibleJumps.empty())
             {
-                if (currentBoard[northEast] == '_')
+                if (northEast >= 0 && currentBoard[northEast] == '_')
                 {
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[northEast]);
                     possibleMoves.push_back(tempBoard);
                 }
-                if (currentBoard[northWest] == '_')
+                if (northWest >= 0 && currentBoard[northWest] == '_')
                 {
                     tempBoard = currentBoard;
                     swap(tempBoard[redPieces[i].first], tempBoard[northWest]);
@@ -717,14 +721,15 @@ double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, doub
     
     if(!isRed) // if black
     {
-        currentNode->board = invertBoard(currentNode->board);
+        string temp = invertBoard(currentNode->board);
+        currentNode->board = temp;
     }
     
     vector<string> boards = generateMoves(currentNode->board);
     
     if(!isRed) // if black
     {
-        for(auto &board : boards)
+        for(auto board : boards)
         {
             board = invertBoard(board);
         }
@@ -740,7 +745,6 @@ double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, doub
     if(currentNode->childNodes.size() == 0 || depth == 0)
     {
         string temp = currentNode->board;
-        delete currentNode;
         return evaluateBoard(temp);
     }
 

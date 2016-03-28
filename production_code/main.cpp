@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     {
         cout << "INCORRECT USAGE\nProper Usage:\n\t"<< argv[0] << " inputLayer [otherLayers] outputLayer"
         << "\n\t(Requires at least two layer topologies as inputs)" << endl;
+        exit(1);
     }
     
     initParallel();
@@ -42,6 +43,13 @@ int main(int argc, char *argv[])
     {
         inputs.push_back(atoi(argv[i]));
     }
+    
+    cout << "TOPOLOGY:\n";
+    for(int i=0; i<inputs.size(); ++i)
+    {
+        cout << "Layer " << i << ": " << inputs[i] << " nodes\n";
+    }
+    cout << endl;
 
     NeuralNetwork test(inputs);
     test._isRed = true;
@@ -49,8 +57,20 @@ int main(int argc, char *argv[])
     cout << "NormalBoard best move:" << endl;
     //cout << test.evaluateBoard("rrrrrrrrrrrr________bbbbbbbbbbbb") << endl;
     
-    // starts segfaulting at 7
-    cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 1) << endl;
+    // starts getting slow at 7
+    cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 7) << endl;
+    
+    /*while(true)
+    {
+        vector<string> temp = test.generateMoves("rrrrrrrrrrrr________bbbbbbbbbbbb");
+        
+        for(auto board : temp)
+        {
+            cout << board << endl;
+        }
+    }*/
+    
+    
     
     // cout << "PARENT:" << endl;
     // test.print();
