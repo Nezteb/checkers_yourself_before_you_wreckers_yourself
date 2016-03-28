@@ -62,20 +62,29 @@ struct Node
     Node(string newBoard)
     {
         board = newBoard;
-        parentNode = NULL;
+        //parentNode = NULL;
+    }
+    
+    ~Node()
+    {
+        //parentNode = NULL;
+        for(auto child : childNodes)
+        {
+            delete child; // kill the child
+        }
     }
     
     void createChild(string newBoard)
     {
-        Node temp(newBoard);
-        temp.parentNode = this;
+        Node *temp = new Node(newBoard);
+        //temp->parentNode = this;
         childNodes.push_back(temp);
     }
     
     string board;
     
-    Node *parentNode;
-    vector<Node> childNodes;
+    //Node *parentNode;
+    vector<Node*> childNodes;
     
     void printTree(const string &tab = "", const bool last = true)
     {
@@ -104,14 +113,8 @@ struct Node
             else
                 newTab="│ ";
             
-            childNodes[i].printTree(tab + newTab, i + 1 == childNodes.size());
+            childNodes[i]->printTree(tab + newTab, i + 1 == childNodes.size());
         }
-    }
-    
-    ~Node()
-    {
-        parentNode = NULL;
-        
     }
 };
 
@@ -651,7 +654,6 @@ vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, ve
 
 vector<string> NeuralNetwork::generateMoves(string board)
 {
-
     //string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";     // regular board
     //string board = "______bBr_R_bbbB_____bB_________";     // to check jumps
     //string board = "______________r_b_b__Rr_bbb_____";     // red to king
@@ -708,17 +710,17 @@ string NeuralNetwork::invertBoard(string board)
     return tempBoard;
 }
 
-double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, double beta, bool isRed)
+double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, double beta, bool isRed)
 {
-    Node *child;
+    Node *child = NULL;
     double temp;
     
     if(!isRed) // if black
     {
-        currentNode.board = invertBoard(currentNode.board);
+        currentNode->board = invertBoard(currentNode->board);
     }
     
-    vector<string> boards = generateMoves(currentNode.board);
+    vector<string> boards = generateMoves(currentNode->board);
     
     if(!isRed) // if black
     {
@@ -731,35 +733,37 @@ double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, doub
     for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
     {
         // SORT BOARDS/NODES HERE BEFORE ADDING THEM TO THE TREE
-        currentNode.createChild(boards[i]);
+        currentNode->createChild(boards[i]);
     }
     
     // if we are a leaf or have reached our max depth
-    if(currentNode.childNodes.size() == 0 || depth == 0)
+    if(currentNode->childNodes.size() == 0 || depth == 0)
     {
-        return evaluateBoard(currentNode.board);
+        string temp = currentNode->board;
+        delete currentNode;
+        return evaluateBoard(temp);
     }
 
-    for(int i = 0; i < currentNode.childNodes.size(); ++i) // for each child node
+    for(int i = 0; i < currentNode->childNodes.size(); ++i) // for each child node
     {
-        child = &currentNode.childNodes[i];
+        child = currentNode->childNodes[i];
         
         if(i != 0) // not first child
         {
             // -alpha-1.0 == -(alpha + 1.0) == -beta 
             // scout window
-            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha, !isRed);
+            temp = -negaScout(child, depth-1, -alpha-1.0, -alpha, !isRed);
             
             // if we're still between alpha and beta
             if(alpha < temp && temp < beta)
             {
                 // do a research
-                temp = -negaScout(*child, depth-1, -beta, -temp, !isRed);
+                temp = -negaScout(child, depth-1, -beta, -temp, !isRed);
             }
         }
         else // is first child
         {
-            temp = -negaScout(*child, depth-1, -beta, -alpha, !isRed);
+            temp = -negaScout(child, depth-1, -beta, -alpha, !isRed);
         }
         
         alpha = max(alpha, temp);
@@ -769,6 +773,15 @@ double NeuralNetwork::negaScout(Node &currentNode, int depth, double alpha, doub
             break; // prune
         }
     }
+    
+    child = NULL;
+    
+    //for(auto child : currentNode->childNodes)
+    //{
+    //    delete child; // kill the child
+    //}
+    
+    //delete currentNode;
 
     return alpha;
 }
@@ -782,14 +795,14 @@ string NeuralNetwork::treeSearch(string rootBoard, int depth) // called once
     Node *child;
     bool isRed = _isRed;
 
-    Node root = Node(rootBoard);
+    Node *root = new Node(rootBoard);
 
     if(!isRed) // if black
     {
-        root.board = invertBoard(root.board);
+        root->board = invertBoard(root->board);
     }
 
-    vector<string> boards = generateMoves(root.board);
+    vector<string> boards = generateMoves(root->board);
     
     if(!isRed) // if black
     {
@@ -801,36 +814,37 @@ string NeuralNetwork::treeSearch(string rootBoard, int depth) // called once
     
     for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
     {
-        root.createChild(boards[i]);
+        root->createChild(boards[i]);
     }
 
     // if we are a leaf or have reached our max depth
-    if(root.childNodes.size() == 0 || depth == 0)
+    if(root->childNodes.size() == 0 || depth == 0)
     {
-        return root.board;
+        return "";
+        //return root->board;
         //return evaluateBoard(root.board);
     }
 
-    for(int i = 0; i < root.childNodes.size(); ++i) // for each child node
+    for(int i = 0; i < root->childNodes.size(); ++i) // for each child node
     {
-        child = &root.childNodes[i];
+        child = root->childNodes[i];
         
         if(i != 0) // not first child
         {
             // -alpha-1.0 == -(alpha + 1.0) == -beta 
             // scout window
-            temp = -negaScout(*child, depth-1, -alpha-1.0, -alpha, !isRed);
+            temp = -negaScout(child, depth-1, -alpha-1.0, -alpha, !isRed);
             
             // if we're still between alpha and beta
             if(alpha < temp && temp < beta)
             {
                 // do a research
-                temp = -negaScout(*child, depth-1, -beta, -temp, !isRed);
+                temp = -negaScout(child, depth-1, -beta, -temp, !isRed);
             }
         }
         else // is first child
         {
-            temp = -negaScout(*child, depth-1, -beta, -alpha, !isRed);
+            temp = -negaScout(child, depth-1, -beta, -alpha, !isRed);
         }
         
         //alpha = max(alpha, temp);
@@ -845,6 +859,8 @@ string NeuralNetwork::treeSearch(string rootBoard, int depth) // called once
             break; // prune
         }
     }
+    
+    child = NULL;
 
     return bestBoard;
 }

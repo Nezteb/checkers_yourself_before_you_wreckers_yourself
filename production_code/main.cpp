@@ -5,6 +5,9 @@
 // Compile and run with:
 // g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
+// With no parallelism or threads:
+// g++ -Ofast --std=c++1y -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time ./main.o 32 40 10 1
+
 #include "neuralNetwork.h"
 #include "tournament.h"
 #include "game.h"
@@ -47,7 +50,7 @@ int main(int argc, char *argv[])
     //cout << test.evaluateBoard("rrrrrrrrrrrr________bbbbbbbbbbbb") << endl;
     
     // starts segfaulting at 7
-    cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 2) << endl;
+    cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 1) << endl;
     
     // cout << "PARENT:" << endl;
     // test.print();

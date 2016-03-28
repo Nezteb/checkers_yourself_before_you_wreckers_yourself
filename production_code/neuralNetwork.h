@@ -43,7 +43,7 @@ private:
     static double _sigmoid(double x);
     vector<string> generateJumps(const string &currentBoard, int currentPieceIndex);
     vector<string> generateMovesHelper(const string &currentBoard, vector<pair<int,char>> &redPieces);
-    double negaScout(Node &currentNode, int depth, double alpha, double beta, bool isRed);
+    double negaScout(Node *currentNode, int depth, double alpha, double beta, bool isRed);
     string invertBoard(string board);
 
     double _kingValue;
