@@ -85,7 +85,7 @@ void gameplay(NeuralNetwork & nn1, NeuralNetwork & nn2)
 
 
 
-void tournament(vector<NeuralNetwork> NNs)
+void tournament(vector<NeuralNetwork> & NNs)
 {
     srand (time(NULL));
     for (int i = 0; i < NNs.count(); ++i)

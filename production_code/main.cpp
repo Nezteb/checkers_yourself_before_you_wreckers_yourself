@@ -15,11 +15,15 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <algorithm>
+using std::sort;
 
 #include "../third_party/Eigen/Core"
 using Eigen::initParallel;
 using Eigen::setNbThreads;
 using Eigen::nbThreads;
+
+#define NNSIZE 100
 
 int main(int argc, char *argv[])
 {
@@ -51,6 +55,83 @@ int main(int argc, char *argv[])
     }
     cout << endl;
 
+    /*
+    //ACTUAL NEURALNETWORK EVOLUTION 
+    vector<NeuralNetwork> NNs(NNSIZE);
+    for (int i = 0; i < NNs.size(); ++i)
+    {
+        NNs[i] = NeuralNetwork(inputs);
+    }
+    
+    int generationNum = 0;
+    while(true)
+    {
+        cout << "Generation #" << generationNum << endl;
+        // Start the tournament
+        Tournament tourney(NNs);
+        tourney.tournamentLoop();
+        
+        // Sort the neural networks by performance in the tournament
+        sort(NNs.begin(), NNs.end(), [](NeuralNetwork &a, NeuralNetwork &b)
+        {b._performance < a._performance;});
+        
+        // Overwrite and generate new children
+        int halfNNs = NNs.size() / 2;
+        for(int i = 0; i < halfNNs; ++i)
+        {
+            NNs[halfNNs + i] = NNs[i].spawnChild();
+        }
+        
+        // Zero out all of the new boards 
+        for(auto & nn : NNs)
+        {
+            nn._performance = 0;
+        }
+        
+        // Save/write best NeuralNetwork to file
+        //NNs[0].writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename);
+        //cout << NNs[0] << endl;
+        
+        // Increment generation
+        generationNum += 1;
+    }
+    */
+    
+
+
+    /*
+    //TESTING TOURNAMENT
+    vector<NeuralNetwork> NNs(NNSIZE);
+    for (int i = 0; i < NNs.size(); ++i)
+    {
+        NNs[i] = NeuralNetwork(inputs);
+    }
+    
+    Tournament tourney(NNs);
+    
+    tourney.tournamentLoop();
+    
+    for(int i = 0; i < NNs.size(); ++i)
+    {
+        cout << "NN #" << i << ": "<< NNs[i]._performance << endl;
+    }
+    */
+    
+    /*
+    //TESTING GAME
+    NeuralNetwork red(inputs);
+    NeuralNetwork black(inputs);
+    
+    Game gameTest(red, black);
+    
+    gameTest.gameLoop();
+    
+    cout << "NN red  : "<< red._performance << endl;
+    cout << "NN black: "<< black._performance << endl;
+    */
+    
+    /*
+    //TESTING NEURALNETWORK
     NeuralNetwork test(inputs);
     test._isRed = true;
     
@@ -59,26 +140,37 @@ int main(int argc, char *argv[])
     
     // starts getting slow at 7
     cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 7) << endl;
+    */
     
-    /*while(true)
+    
+    
+    //TESTING GENERATEMOVES
+    NeuralNetwork test(inputs);
+    for(int i = 0; i < 10; ++i)
     {
-        vector<string> temp = test.generateMoves("rrrrrrrrrrrr________bbbbbbbbbbbb");
+        vector<string> temp = test.generateMoves("rrrrrrrrrrrr________bbbbbbbbbbbb", test._isRed);
         
+        cout << "MOVE " << i << ": " << endl;
         for(auto board : temp)
         {
             cout << board << endl;
         }
-    }*/
+        
+        test._isRed = !test._isRed;
+    }
     
     
-    
-    // cout << "PARENT:" << endl;
-    // test.print();
+    /*
+    //TESTING EVOLUTION
+    NeuralNetwork test(inputs);
+    cout << "PARENT:" << endl;
+    test.print();
 
-    // NeuralNetwork baby = test.spawnChild();
+    NeuralNetwork baby = test.spawnChild();
     
-    // cout << "CHILD:" << endl;
-    // baby.print();
+    cout << "CHILD:" << endl;
+    baby.print();
+    */
     
     return 0;
 }

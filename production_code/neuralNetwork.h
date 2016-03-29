@@ -28,23 +28,30 @@ class NeuralNetwork
 {
 public:
     NeuralNetwork(vector<int> topology);
+    
     void feedForward();
     NeuralNetwork spawnChild();
+    
     void print();
     double evaluateBoard(const string &board);
+    
     MatrixXXd readWeightFromFile(const string subdirectory, string weightFilename);
     void writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename);
-    vector<string> generateMoves(string board);
+    
+    vector<string> generateMoves(string board, bool isRed);
+    
     string treeSearch(string rootBoard, int depth);
     
     int _performance;
+    
     bool _isRed;
 private:
     static double _sigmoid(double x);
-    vector<string> generateJumps(const string &currentBoard, int currentPieceIndex);
-    vector<string> generateMovesHelper(const string &currentBoard, vector<pair<int,char>> &redPieces);
+    
+    vector<string> pieceMove(const string currentBoard, char piece, int index, bool isRed);
+    vector<string> generateMovesHelper(const string currentBoard, vector<pair<int,char>> &pieces, bool isRed);
+    
     double negaScout(Node *currentNode, int depth, double alpha, double beta, bool isRed);
-    string invertBoard(string board);
 
     double _kingValue;
     vector<int> _topology;

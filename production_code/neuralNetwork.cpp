@@ -18,6 +18,8 @@ using Eigen::nbThreads;
 
 typedef Matrix<double, Dynamic, Dynamic, RowMajor> MatrixXXd;
 
+#include <array>
+using std::array;
 #include <vector>
 using std::vector;
 #include <iostream>
@@ -342,14 +344,10 @@ void NeuralNetwork::writeWeightToFile(const string subdirectory, MatrixXXd weigh
 #define BOARD_SIZE 32
 
 enum { NE=0, SE=1, SW=2, NW=3 };
-
-// red piece move
-// from top of board
 // access with: movesBoard[pieceIndex * 4 + direction]
 // pieceIndex: NE, SE, SW, NW
-
-// each pair of four numbers represents one piece and its four directional moves (based on above enum)
-const vector<int> movesBoard = {
+// each group of four numbers represents one piece and its four directional moves (based on above enum)
+const array<int, 128> movesBoard = {
             -1,  5,  4, -1,
             -1,  6,  5, -1,
             -1,  7,  6, -1,
@@ -381,337 +379,376 @@ const vector<int> movesBoard = {
             24, -1, -1, -1,
             25, -1, -1, 24,
             26, -1, -1, 25,
-            27, -1, -1, 26 };
+            27, -1, -1, 26
+};
+const array<int, 128> jumpsBoard = {
+            -1,  9, -1, -1,
+            -1, 10,  8, -1,
+            -1, 11,  9, -1,
+            -1, -1, 10, -1,
+            -1, 13, -1, -1,
+            -1, 14, 12, -1,
+            -1, 15, 13, -1,
+            -1, -1, 14, -1,
+             1, 17, -1, -1,
+             2, 18, 16,  0,
+             3, 19, 17,  1,
+            -1, -1, 18,  2,
+             5, 21, -1, -1,
+             6, 22, 20,  4,
+             7, 23, 21,  5,
+            -1, -1, 22,  6,
+             9, 25, -1, -1,
+            10, 26, 24,  8,
+            11, 27, 25,  9,
+            -1, -1, 26, 10,
+            13, 29, -1, -1,
+            14, 30, 28, 12,
+            15, 31, 29, 13,
+            -1, -1, 30, 14,
+            17, -1, -1, -1,
+            18, -1, -1, 16,
+            19, -1, -1, 17,
+            -1, -1, -1, 18,
+            21, -1, -1, -1,
+            22, -1, -1, 20,
+            23, -1, -1, 21,
+            -1, -1, -1, 22
+};
 
-vector<string> NeuralNetwork::generateJumps(const string &currentBoard, int currentPieceIndex)
+vector<string> NeuralNetwork::pieceMove(const string currentBoard, char piece, int index, bool isRed)
 {
-    vector<string> possibleJumps;
-    string tempBoard;
+    vector<string> moves;
+    string temp = currentBoard;
+    bool canJump;
+    
+    int northEast = movesBoard[index * 4 + NE];
+    int southEast = movesBoard[index * 4 + SE];
+    int southWest = movesBoard[index * 4 + SW];
+    int northWest = movesBoard[index * 4 + NW];
 
-    int southEast;
-    int southWest;
-    int northEast;
-    int northWest;
-
-    int nextSouthEast;
-    int nextSouthWest;
-    int nextNorthEast;
-    int nextNorthWest;
-
-    if(currentBoard[currentPieceIndex] == 'r' || currentBoard[currentPieceIndex] == 'R')
+    int jumpNorthEast = jumpsBoard[index * 4 + NE];
+    int jumpSouthEast = jumpsBoard[index * 4 + SE];
+    int jumpSouthWest = jumpsBoard[index * 4 + SW];
+    int jumpNorthWest = jumpsBoard[index * 4 + NW];
+    
+    // jumps
+    if(isRed) // red
     {
-        southEast = movesBoard[currentPieceIndex * 4 + SE];
-        southWest = movesBoard[currentPieceIndex * 4 + SW];
-
-        if (southEast >= 0 && (currentBoard[southEast] == 'b' || currentBoard[southEast] == 'B'))
+        char pawn = 'r'; char king = 'R';
+        char enemyPawn = 'b'; char enemyKing = 'B';
+        
+        // king northeast jump
+        if( (northEast != 0) && (jumpNorthEast !=0) &&
+            (temp[index] == king) &&
+            (temp[northEast] == enemyPawn || temp[northEast] == enemyKing) &&
+            (temp[jumpNorthEast] == '_')
+        )
         {
-            nextSouthEast = movesBoard[southEast * 4 + SE];
-
-            if(nextSouthEast >= 0 && currentBoard[nextSouthEast] == '_')
+            temp[northEast] = '_';
+            // promote pawn if in last row
+            swap(temp[index], temp[jumpNorthEast]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+        // king northwest jump
+        if( (northWest != 0) && (jumpNorthWest !=0) &&
+            (temp[index] == king) &&
+            (temp[northWest] == enemyPawn || temp[northWest] == enemyKing) &&
+            (temp[jumpNorthWest] == '_')
+        )
+        {
+            temp[northWest] = '_';
+            // promote pawn if in last row
+            swap(temp[index], temp[jumpNorthWest]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+        // king/pawn southeast jump
+        if( (southEast != 0) && (jumpSouthEast !=0) &&
+            (temp[index] == king || temp[index] == pawn) &&
+            (temp[southEast] == enemyPawn || temp[southEast] == enemyKing) &&
+            (temp[jumpSouthEast] == '_')
+        )
+        {
+            temp[southEast] = '_';
+            // promote pawn if in last row
+            if( (temp[index] == pawn) && (jumpSouthEast >= 28) )
             {
-                tempBoard = currentBoard;
-                tempBoard[southEast] = '_';
-                swap(tempBoard[currentPieceIndex], tempBoard[nextSouthEast]);
-                vector<string> tempJumps;
-
-                if(nextSouthEast >= 28 && tempBoard[nextSouthEast] == 'r')
+                temp[index] = king;
+            }
+            swap(temp[index], temp[jumpSouthEast]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+        // king/pawn southwest jump
+        if( (southEast != 0) && (jumpSouthWest !=0) &&
+            (temp[index] == king || temp[index] == pawn) &&
+            (temp[southWest] == enemyPawn || temp[southWest] == enemyKing) &&
+            (temp[jumpSouthWest] == '_')
+        )
+        {
+            temp[southWest] = '_';
+            // promote pawn if in last row
+            if( (temp[index] == pawn) && (jumpSouthWest >= 28) )
+            {
+                temp[index] = king;
+            }
+            swap(temp[index], temp[jumpSouthWest]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+    }
+    else // black
+    {
+        char pawn = 'b'; char king = 'B';
+        char enemyPawn = 'r'; char enemyKing = 'R';
+        
+        // king southeast jump
+        if( (southEast != 0) && (jumpSouthEast !=0) &&
+            (temp[index] == king) &&
+            (temp[southEast] == enemyPawn || temp[southEast] == enemyKing) &&
+            (temp[jumpSouthEast] == '_')
+        )
+        {
+            temp[southEast] = '_';
+            swap(temp[index], temp[jumpSouthEast]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+        // king southwest jump
+        if( (southEast != 0) && (jumpSouthWest !=0) &&
+            (temp[index] == king) &&
+            (temp[southWest] == enemyPawn || temp[southWest] == enemyKing) &&
+            (temp[jumpSouthWest] == '_')
+        )
+        {
+            temp[southWest] = '_';
+            swap(temp[index], temp[jumpSouthWest]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+        // king/pawn northeast jump
+        if( (northEast != 0) && (jumpNorthEast !=0) &&
+            (temp[index] == king || temp[index] == pawn) &&
+            (temp[northEast] == enemyPawn || temp[northEast] == enemyKing) &&
+            (temp[jumpNorthEast] == '_')
+        )
+        {
+            temp[northEast] = '_';
+            // promote pawn if in last row
+            if( (temp[index] == pawn) && (jumpNorthEast >= 28) )
+            {
+                temp[index] = king;
+            }
+            swap(temp[index], temp[jumpNorthEast]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+        // king/pawn northwest jump
+        if( (northWest != 0) && (jumpNorthWest !=0) &&
+            (temp[index] == king || temp[index] == pawn) &&
+            (temp[northWest] == enemyPawn || temp[northWest] == enemyKing) &&
+            (temp[jumpNorthWest] == '_')
+        )
+        {
+            temp[northWest] = '_';
+            // promote pawn if in last row
+            if( (temp[index] == pawn) && (jumpNorthWest >= 28) )
+            {
+                temp[index] = king;
+            }
+            swap(temp[index], temp[jumpNorthWest]);
+            moves.push_back(temp);
+            temp = currentBoard;
+            canJump = true;
+        }
+    }
+    
+    // moves
+    if(!canJump)
+    {
+        if(isRed) // red
+        {
+            char pawn = 'r'; char king = 'R';
+            char enemyPawn = 'b'; char enemyKing = 'B';
+            
+            // king northeast move
+            if( (northEast != 0) && (jumpNorthEast !=0) &&
+                (temp[index] == king) &&
+                (temp[northEast] == '_')
+            )
+            {
+                temp[northEast] = '_';
+                swap(temp[index], temp[jumpNorthEast]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
+            }
+            // king northwest move
+            if( (northWest != 0) && (jumpNorthWest !=0) &&
+                (temp[index] == king) &&
+                (temp[northWest] == '_')
+            )
+            {
+                temp[northWest] = '_';
+                // promote pawn if in last row
+                swap(temp[index], temp[jumpNorthWest]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
+            }
+            // king/pawn southeast move
+            if( (southEast != 0) && (jumpSouthEast !=0) &&
+                (temp[index] == king || temp[index] == pawn) &&
+                (temp[southEast] == '_')
+            )
+            {
+                temp[southEast] = '_';
+                // promote pawn if in last row
+                if( (temp[index] == pawn) && (jumpSouthEast >= 28) )
                 {
-                    tempBoard[nextSouthEast] = 'R';
-                    tempJumps.push_back(tempBoard);
+                    temp[index] = king;
                 }
-                else
+                swap(temp[index], temp[jumpSouthEast]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
+            }
+            // king/pawn southwest move
+            if( (southEast != 0) && (jumpSouthWest !=0) &&
+                (temp[index] == king || temp[index] == pawn) &&
+                (temp[southWest] == '_')
+            )
+            {
+                temp[southWest] = '_';
+                // promote pawn if in last row
+                if( (temp[index] == pawn) && (jumpSouthWest >= 28) )
                 {
-                    tempJumps = generateJumps(tempBoard, nextSouthEast);
+                    temp[index] = king;
                 }
-
-                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+                swap(temp[index], temp[jumpSouthWest]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
             }
         }
-        if (southWest >= 0 && (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B'))
+        else // black
         {
-            nextSouthWest = movesBoard[southWest * 4 + SW];
-
-            if(nextSouthWest >= 0 && currentBoard[nextSouthWest] == '_')
+            char pawn = 'r'; char king = 'R';
+            char enemyPawn = 'b'; char enemyKing = 'B';
+            
+            // king southeast mov
+            if( (southEast != 0) && (jumpSouthEast !=0) &&
+                (temp[index] == king) &&
+                (temp[southEast] == '_')
+            )
             {
-                tempBoard = currentBoard;
-                tempBoard[southWest] = '_';
-                swap(tempBoard[currentPieceIndex], tempBoard[nextSouthWest]);
-                vector<string> tempJumps;
-
-                if(nextSouthWest >= 28 && tempBoard[nextSouthWest] == 'r')
+                temp[southEast] = '_';
+                swap(temp[index], temp[jumpSouthEast]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
+            }
+            // king southwest mov
+            if( (southEast != 0) && (jumpSouthWest !=0) &&
+                (temp[index] == king) &&
+                (temp[southWest] == '_')
+            )
+            {
+                temp[southWest] = '_';
+                swap(temp[index], temp[jumpSouthWest]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
+            }
+            // king/pawn northeast move
+            if( (northEast != 0) && (jumpNorthEast !=0) &&
+                (temp[index] == king || temp[index] == pawn) &&
+                (temp[northEast] == '_')
+            )
+            {
+                temp[northEast] = '_';
+                // promote pawn if in last row
+                if( (temp[index] == pawn) && (jumpNorthEast >= 28) )
                 {
-                    tempBoard[nextSouthWest] = 'R';
-                    tempJumps.push_back(tempBoard);
+                    temp[index] = king;
                 }
-                else
+                swap(temp[index], temp[jumpNorthEast]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
+            }
+            // king/pawn northwest move
+            if( (northWest != 0) && (jumpNorthWest !=0) &&
+                (temp[index] == king || temp[index] == pawn) &&
+                (temp[northWest] == '_')
+            )
+            {
+                temp[northWest] = '_';
+                // promote pawn if in last row
+                if( (temp[index] == pawn) && (jumpNorthWest >= 28) )
                 {
-                    tempJumps = generateJumps(tempBoard, nextSouthWest);
+                    temp[index] = king;
                 }
-
-                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
+                swap(temp[index], temp[jumpNorthWest]);
+                moves.push_back(temp);
+                temp = currentBoard;
+                canJump = true;
             }
         }
     }
-    if(currentBoard[currentPieceIndex] == 'R')
-    {
-        northEast = movesBoard[currentPieceIndex * 4 + NE];
-        northWest = movesBoard[currentPieceIndex * 4 + NW];
-
-        if (northEast >= 0 && (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B'))
-        {
-            nextNorthEast = movesBoard[northEast * 4 + NE];
-
-            if(nextNorthEast >= 0 && currentBoard[nextNorthEast] == '_')
-            {
-                tempBoard = currentBoard;
-                tempBoard[northEast] = '_';
-                swap(tempBoard[currentPieceIndex], tempBoard[nextNorthEast]);
-
-                vector<string> tempJumps = generateJumps(tempBoard, nextNorthEast);
-                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
-            }
-        }
-        if (northWest >= 0 && (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B'))
-        {
-            nextNorthWest = movesBoard[northWest * 4 + NW];
-
-            if(nextNorthWest >= 0 && currentBoard[nextNorthWest] == '_')
-            {
-                tempBoard = currentBoard;
-                tempBoard[northWest] = '_';
-                swap(tempBoard[currentPieceIndex], tempBoard[nextNorthWest]);
-
-                vector<string> tempJumps = generateJumps(tempBoard, nextNorthWest);
-                possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
-            }
-        }
-    }
-
-    if(possibleJumps.empty())
-    {
-        return vector<string>{currentBoard};
-    }
-    return possibleJumps;
+    
+    return moves;
 }
 
 // checks every spot on the board for valid moves
 // returns a vector of board strings
-vector<string> NeuralNetwork::generateMovesHelper(const string &currentBoard, vector<pair<int,char>> &redPieces)
+vector<string> NeuralNetwork::generateMovesHelper(const string currentBoard, vector<pair<int,char>> &pieces, bool isRed)
 {
-    vector<string> possibleMoves;
-    vector<string> possibleJumps;
-    string tempBoard;
-
-    int southEast;
-    int southWest;
-    int northEast;
-    int northWest;
-
-    int nextSouthEast;
-    int nextSouthWest;
-    int nextNorthEast;
-    int nextNorthWest;
-
-    for (int i = 0; i < redPieces.size(); ++i)
+    vector<string> jumpsMoves;
+    
+    for (int i = 0; i < pieces.size(); ++i)
     {
-        if (redPieces[i].second == 'r' || redPieces[i].second == 'R')
-        {
-            southEast = movesBoard[redPieces[i].first * 4 + SE];
-            southWest = movesBoard[redPieces[i].first * 4 + SW];
-
-            if (southEast >= 0 && (currentBoard[southEast] == 'b' || currentBoard[southEast] == 'B'))
-            {
-                nextSouthEast = movesBoard[southEast * 4 + SE];
-
-                if(nextSouthEast >= 0 && currentBoard[nextSouthEast] == '_')
-                {
-                    tempBoard = currentBoard;
-                    tempBoard[southEast] = '_';
-                    swap(tempBoard[redPieces[i].first], tempBoard[nextSouthEast]);
-                    vector<string> tempJumps;
-
-                    if(nextSouthEast >= 28 && redPieces[i].second == 'r')
-                    {
-                        tempBoard[nextSouthEast] = 'R';
-                        tempJumps.push_back(tempBoard);
-                    }
-                    else
-                    {
-                        tempJumps = generateJumps(tempBoard, nextSouthEast);
-                    }
-
-                    possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
-                }
-            }
-            if (southWest >= 0 && (currentBoard[southWest] == 'b' || currentBoard[southWest] == 'B'))
-            {
-                nextSouthWest = movesBoard[southWest * 4 + SW];
-
-                if(nextSouthWest >= 0 && currentBoard[nextSouthWest] == '_')
-                {
-                    tempBoard = currentBoard;
-                    tempBoard[southWest] = '_';
-                    swap(tempBoard[redPieces[i].first], tempBoard[nextSouthWest]);
-                    vector<string> tempJumps;
-
-                    if(nextSouthWest >= 28 && redPieces[i].second == 'r')
-                    {
-                        tempBoard[nextSouthWest] = 'R';
-                        tempJumps.push_back(tempBoard);
-                    } else
-                    {
-                        tempJumps = generateJumps(tempBoard, nextSouthWest);
-                    }
-
-                    possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
-                }
-            }
-            if (possibleJumps.empty())
-            {
-                if (southEast >= 0 && currentBoard[southEast] == '_')
-                {
-                    tempBoard = currentBoard;
-                    swap(tempBoard[redPieces[i].first], tempBoard[southEast]);
-
-                    if(southEast >= 28 && redPieces[i].second == 'r')
-                    {
-                        tempBoard[southEast] = 'R';
-                    }
-
-                    possibleMoves.push_back(tempBoard);
-                }
-                if (southWest >= 0 && currentBoard[southWest] == '_')
-                {
-                    tempBoard = currentBoard;
-                    swap(tempBoard[redPieces[i].first], tempBoard[southWest]);
-
-                    if(southWest >= 28 && redPieces[i].second == 'r')
-                    {
-                        tempBoard[southWest] = 'R';
-                    }
-
-                    possibleMoves.push_back(tempBoard);
-                }
-            }
-        }
-        if (redPieces[i].second == 'R')
-        {
-            northEast = movesBoard[redPieces[i].first * 4 + NE];
-            northWest = movesBoard[redPieces[i].first * 4 + NW];
-
-            if (northEast >= 0 && (currentBoard[northEast] == 'b' || currentBoard[northEast] == 'B'))
-            {
-                nextNorthEast = movesBoard[northEast * 4 + NE];
-
-                if(nextNorthEast >= 0 && currentBoard[nextNorthEast] == '_')
-                {
-                    tempBoard = currentBoard;
-                    tempBoard[northEast] = '_';
-                    swap(tempBoard[redPieces[i].first], tempBoard[nextNorthEast]);
-
-                    vector<string> tempJumps = generateJumps(tempBoard, nextNorthEast);
-                    possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
-                }
-            }
-            if (northWest >= 0 && (currentBoard[northWest] == 'b' || currentBoard[northWest] == 'B'))
-            {
-                nextNorthWest = movesBoard[northWest * 4 + NW];
-
-                if(nextNorthWest >= 0 && currentBoard[nextNorthWest] == '_')
-                {
-                    tempBoard = currentBoard;
-                    tempBoard[northWest] = '_';
-                    swap(tempBoard[redPieces[i].first], tempBoard[nextNorthWest]);
-
-                    vector<string> tempJumps = generateJumps(tempBoard, nextNorthWest);
-                    possibleJumps.insert(possibleJumps.end(), tempJumps.begin(), tempJumps.end());
-                }
-            }
-            if(possibleJumps.empty())
-            {
-                if (northEast >= 0 && currentBoard[northEast] == '_')
-                {
-                    tempBoard = currentBoard;
-                    swap(tempBoard[redPieces[i].first], tempBoard[northEast]);
-                    possibleMoves.push_back(tempBoard);
-                }
-                if (northWest >= 0 && currentBoard[northWest] == '_')
-                {
-                    tempBoard = currentBoard;
-                    swap(tempBoard[redPieces[i].first], tempBoard[northWest]);
-                    possibleMoves.push_back(tempBoard);
-                }
-            }
-        }
+        pair<int,char> piece = pieces[i];
+        vector<string> temp = pieceMove(currentBoard, piece.second, piece.first, isRed);
+        jumpsMoves.insert(jumpsMoves.end(), temp.begin(), temp.end());
     }
 
-    // prioritize jumps
-    if(!possibleJumps.empty())
-    {
-        sort(possibleJumps.begin(), possibleJumps.end());
-        possibleJumps.erase(unique(possibleJumps.begin(), possibleJumps.end()), possibleJumps.end());
-        return possibleJumps;
-    }
-
-    return possibleMoves;
+    sort(jumpsMoves.begin(), jumpsMoves.end());
+    jumpsMoves.erase(unique(jumpsMoves.begin(), jumpsMoves.end()), jumpsMoves.end());
+    return jumpsMoves;
 }
 
-vector<string> NeuralNetwork::generateMoves(string board)
+vector<string> NeuralNetwork::generateMoves(string board, bool isRed)
 {
-    //string board = "rrrrrrrrrrrr________bbbbbbbbbbbb";     // regular board
-    //string board = "______bBr_R_bbbB_____bB_________";     // to check jumps
-    //string board = "______________r_b_b__Rr_bbb_____";     // red to king
-    //string board = "_________R___bb______bb_________";     // king cycle (duplicate board?) //TODO
-
-    //const char notKing = 'r';
-    //const char king = 'R';
-
     // each int represents an index of the board string
-    vector<pair<int,char>> redPieces;
-
-    // Populate red pieces
+    vector<pair<int,char>> pieces;
+    
+    // Populate pieces
     for(int i=0; i < board.size(); ++i)
     {
-        if(board[i] == 'r')
+        switch(board[i])
         {
-            redPieces.push_back(pair<int,char>(i, 'r'));
-        }
-        else if(board[i] == 'R')
-        {
-            redPieces.push_back(pair<int,char>(i, 'R'));
+            case 'r':
+            case 'R':
+                if(isRed) pieces.push_back(pair<int,char>(i, board[i]));
+                break;
+            case 'b':
+            case 'B':
+                if(!isRed) pieces.push_back(pair<int,char>(i, board[i]));
+                
         }
     }
-
-    // Tuple debugging
-    //for(int i=0; i < redPieces.size(); ++i)
-    //{
-    //    cout << "tuple " << i << ": (" << redPieces[i].first << ", " << redPieces[i].second << ")" << endl;
-    //}
     
-    //for(auto move: possibleMoves)
-    //{
-    //    cout << move << endl;
-    //}
-
-    return generateMovesHelper(board, redPieces);
-}
-
-string NeuralNetwork::invertBoard(string board)
-{
-    string tempBoard = board;
-    reverse(tempBoard.begin(), tempBoard.end());
-    
-    // need a temp character
-    replace(tempBoard.begin(), tempBoard.end(), 'r', 't' );
-    replace(tempBoard.begin(), tempBoard.end(), 'R', 'T' );
-    
-    replace(tempBoard.begin(), tempBoard.end(), 'b', 'r' );
-    replace(tempBoard.begin(), tempBoard.end(), 'B', 'R' );
-    
-    replace(tempBoard.begin(), tempBoard.end(), 't', 'b' );
-    replace(tempBoard.begin(), tempBoard.end(), 'T', 'B' );
-    
-    return tempBoard;
+    return generateMovesHelper(board, pieces, isRed);
 }
 
 double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, double beta, bool isRed)
@@ -719,21 +756,7 @@ double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, doub
     Node *child = NULL;
     double temp;
     
-    if(!isRed) // if black
-    {
-        string temp = invertBoard(currentNode->board);
-        currentNode->board = temp;
-    }
-    
-    vector<string> boards = generateMoves(currentNode->board);
-    
-    if(!isRed) // if black
-    {
-        for(auto board : boards)
-        {
-            board = invertBoard(board);
-        }
-    }
+    vector<string> boards = generateMoves(currentNode->board, isRed);
     
     for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
     {
@@ -801,20 +824,7 @@ string NeuralNetwork::treeSearch(string rootBoard, int depth) // called once
 
     Node *root = new Node(rootBoard);
 
-    if(!isRed) // if black
-    {
-        root->board = invertBoard(root->board);
-    }
-
-    vector<string> boards = generateMoves(root->board);
-    
-    if(!isRed) // if black
-    {
-        for(auto &board : boards)
-        {
-            board = invertBoard(board);
-        }
-    }
+    vector<string> boards = generateMoves(root->board, isRed);
     
     for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
     {
