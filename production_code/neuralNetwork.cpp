@@ -416,11 +416,10 @@ const array<int, 128> jumpsBoard = {
             -1, -1, -1, 22
 };
 
-vector<string> NeuralNetwork::pieceMove(const string currentBoard, char piece, int index, bool isRed)
+bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, const string currentBoard, char piece, int index, bool isRed, bool &canJump)
 {
-    vector<string> moves;
     string temp = currentBoard;
-    bool canJump;
+    bool didJump = false;
     
     int northEast = movesBoard[index * 4 + NE];
     int southEast = movesBoard[index * 4 + SE];
@@ -432,299 +431,368 @@ vector<string> NeuralNetwork::pieceMove(const string currentBoard, char piece, i
     int jumpSouthWest = jumpsBoard[index * 4 + SW];
     int jumpNorthWest = jumpsBoard[index * 4 + NW];
     
-    // jumps
-    if(isRed) // red
+    // ######################################## JUMPS ########################################
+    
+    // ######################################## RED JUMP ########################################
+    if(isRed)
     {
         char pawn = 'r'; char king = 'R';
         char enemyPawn = 'b'; char enemyKing = 'B';
         
         // king northeast jump
-        if( (northEast != 0) && (jumpNorthEast !=0) &&
+        if( (northEast != -1) && (jumpNorthEast != -1) &&
             (temp[index] == king) &&
             (temp[northEast] == enemyPawn || temp[northEast] == enemyKing) &&
             (temp[jumpNorthEast] == '_')
         )
         {
-            temp[northEast] = '_';
-            // promote pawn if in last row
-            swap(temp[index], temp[jumpNorthEast]);
-            moves.push_back(temp);
-            temp = currentBoard;
             canJump = true;
+            temp[northEast] = '_';
+            swap(temp[index], temp[jumpNorthEast]);
+            
+            didJump = true;
+            if (!pieceMove(jumps, moves, temp, piece, jumpNorthEast, isRed, canJump)) //if did not jump
+            {
+                jumps.push_back(temp); //record jump
+            }
+            
+            temp = currentBoard;
         }
         // king northwest jump
-        if( (northWest != 0) && (jumpNorthWest !=0) &&
+        if( (northWest != -1) && (jumpNorthWest != -1) &&
             (temp[index] == king) &&
             (temp[northWest] == enemyPawn || temp[northWest] == enemyKing) &&
             (temp[jumpNorthWest] == '_')
         )
         {
-            temp[northWest] = '_';
-            // promote pawn if in last row
-            swap(temp[index], temp[jumpNorthWest]);
-            moves.push_back(temp);
-            temp = currentBoard;
             canJump = true;
+            temp[northWest] = '_';
+            swap(temp[index], temp[jumpNorthWest]);
+            
+            didJump = true;
+            if (!pieceMove(jumps, moves, temp, piece, jumpNorthWest, isRed, canJump)) //if did not jump
+            {
+                jumps.push_back(temp); //record jump
+            }
+            
+            temp = currentBoard;
         }
         // king/pawn southeast jump
-        if( (southEast != 0) && (jumpSouthEast !=0) &&
+        if( (southEast != -1) && (jumpSouthEast != -1) &&
             (temp[index] == king || temp[index] == pawn) &&
             (temp[southEast] == enemyPawn || temp[southEast] == enemyKing) &&
             (temp[jumpSouthEast] == '_')
         )
         {
-            temp[southEast] = '_';
-            // promote pawn if in last row
-            if( (temp[index] == pawn) && (jumpSouthEast >= 28) )
-            {
-                temp[index] = king;
-            }
-            swap(temp[index], temp[jumpSouthEast]);
-            moves.push_back(temp);
-            temp = currentBoard;
             canJump = true;
+            temp[southEast] = '_';
+            swap(temp[index], temp[jumpSouthEast]);
+            
+            // promote pawn if in last row
+            if( (temp[jumpSouthEast] == pawn) && (jumpSouthEast >= 28) )
+            {
+                temp[jumpSouthEast] = king;
+                jumps.push_back(temp);
+            }
+            else
+            {
+                didJump = true;
+                if (!pieceMove(jumps, moves, temp, piece, jumpSouthEast, isRed, canJump)) //if did not jump
+                {
+                    jumps.push_back(temp); //record jump
+                }
+            }
+            
+            temp = currentBoard;
         }
         // king/pawn southwest jump
-        if( (southEast != 0) && (jumpSouthWest !=0) &&
+        if( (southWest != -1) && (jumpSouthWest != -1) &&
             (temp[index] == king || temp[index] == pawn) &&
             (temp[southWest] == enemyPawn || temp[southWest] == enemyKing) &&
             (temp[jumpSouthWest] == '_')
         )
         {
-            temp[southWest] = '_';
-            // promote pawn if in last row
-            if( (temp[index] == pawn) && (jumpSouthWest >= 28) )
-            {
-                temp[index] = king;
-            }
-            swap(temp[index], temp[jumpSouthWest]);
-            moves.push_back(temp);
-            temp = currentBoard;
             canJump = true;
+            temp[southWest] = '_';
+            swap(temp[index], temp[jumpSouthWest]);
+            
+            // promote pawn if in last row
+            if( (temp[jumpSouthWest] == pawn) && (jumpSouthWest >= 28) )
+            {
+                temp[jumpSouthWest] = king;
+                jumps.push_back(temp);
+            }
+            else
+            {
+                didJump = true;
+                if (!pieceMove(jumps, moves, temp, piece, jumpSouthWest, isRed, canJump)) //if did not jump
+                {
+                    jumps.push_back(temp); //record jump
+                }
+            }
+            
+            temp = currentBoard;
         }
     }
-    else // black
+    // ######################################## BLACK JUMP ########################################
+    else
     {
         char pawn = 'b'; char king = 'B';
         char enemyPawn = 'r'; char enemyKing = 'R';
         
         // king southeast jump
-        if( (southEast != 0) && (jumpSouthEast !=0) &&
+        if( (southEast != -1) && (jumpSouthEast != -1) &&
             (temp[index] == king) &&
             (temp[southEast] == enemyPawn || temp[southEast] == enemyKing) &&
             (temp[jumpSouthEast] == '_')
         )
         {
+            canJump = true;
             temp[southEast] = '_';
             swap(temp[index], temp[jumpSouthEast]);
-            moves.push_back(temp);
+            
+            didJump = true;
+            if (!pieceMove(jumps, moves, temp, piece, jumpSouthEast, isRed, canJump)) //if did not jump
+            {
+                jumps.push_back(temp); //record jump
+            }
+            
             temp = currentBoard;
-            canJump = true;
         }
         // king southwest jump
-        if( (southEast != 0) && (jumpSouthWest !=0) &&
+        if( (southEast != -1) && (jumpSouthWest != -1) &&
             (temp[index] == king) &&
             (temp[southWest] == enemyPawn || temp[southWest] == enemyKing) &&
             (temp[jumpSouthWest] == '_')
         )
         {
+            canJump = true;
             temp[southWest] = '_';
             swap(temp[index], temp[jumpSouthWest]);
-            moves.push_back(temp);
+            
+            didJump = true;
+            if (!pieceMove(jumps, moves, temp, piece, jumpSouthWest, isRed, canJump)) //if did not jump
+            {
+                jumps.push_back(temp); //record jump
+            }
+            
             temp = currentBoard;
-            canJump = true;
         }
         // king/pawn northeast jump
-        if( (northEast != 0) && (jumpNorthEast !=0) &&
+        if( (northEast != -1) && (jumpNorthEast != -1) &&
             (temp[index] == king || temp[index] == pawn) &&
             (temp[northEast] == enemyPawn || temp[northEast] == enemyKing) &&
             (temp[jumpNorthEast] == '_')
         )
         {
-            temp[northEast] = '_';
-            // promote pawn if in last row
-            if( (temp[index] == pawn) && (jumpNorthEast >= 28) )
-            {
-                temp[index] = king;
-            }
-            swap(temp[index], temp[jumpNorthEast]);
-            moves.push_back(temp);
-            temp = currentBoard;
             canJump = true;
+            temp[northEast] = '_';
+            swap(temp[index], temp[jumpNorthEast]);
+            
+            // promote pawn if in last row
+            if( (temp[jumpNorthEast] == pawn) && (jumpNorthEast <= 3) )
+            {
+                temp[jumpNorthEast] = king;
+                jumps.push_back(temp);
+            }
+            else
+            {
+                didJump = true;
+                if (!pieceMove(jumps, moves, temp, piece, jumpNorthEast, isRed, canJump)) //if did not jump
+                {
+                    jumps.push_back(temp); //record jump
+                }
+            }
+            
+            temp = currentBoard;
         }
         // king/pawn northwest jump
-        if( (northWest != 0) && (jumpNorthWest !=0) &&
+        if( (northWest != -1) && (jumpNorthWest != -1) &&
             (temp[index] == king || temp[index] == pawn) &&
             (temp[northWest] == enemyPawn || temp[northWest] == enemyKing) &&
             (temp[jumpNorthWest] == '_')
         )
         {
-            temp[northWest] = '_';
-            // promote pawn if in last row
-            if( (temp[index] == pawn) && (jumpNorthWest >= 28) )
-            {
-                temp[index] = king;
-            }
-            swap(temp[index], temp[jumpNorthWest]);
-            moves.push_back(temp);
-            temp = currentBoard;
             canJump = true;
+            temp[northWest] = '_';
+            swap(temp[index], temp[jumpNorthWest]);
+            
+            // promote pawn if in last row
+            if( (temp[jumpNorthWest] == pawn) && (jumpNorthWest <= 3) )
+            {
+                temp[jumpNorthWest] = king;
+                jumps.push_back(temp);
+            }
+            else
+            {
+                didJump = true;
+                if (!pieceMove(jumps, moves, temp, piece, jumpNorthWest, isRed, canJump)) //if did not jump
+                {
+                    jumps.push_back(temp); //record jump
+                }
+            }
+            
+            temp = currentBoard;
         }
     }
     
-    // moves
+    // ######################################## MOVES ########################################
     if(!canJump)
     {
-        if(isRed) // red
+        // ######################################## RED MOVES ########################################
+        if(isRed)
         {
             char pawn = 'r'; char king = 'R';
             char enemyPawn = 'b'; char enemyKing = 'B';
             
             // king northeast move
-            if( (northEast != 0) && (jumpNorthEast !=0) &&
+            if( (northEast !=  -1)  &&
                 (temp[index] == king) &&
                 (temp[northEast] == '_')
             )
             {
-                temp[northEast] = '_';
-                swap(temp[index], temp[jumpNorthEast]);
+                swap(temp[index], temp[northEast]);
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
             // king northwest move
-            if( (northWest != 0) && (jumpNorthWest !=0) &&
+            if( (northWest != -1) &&
                 (temp[index] == king) &&
                 (temp[northWest] == '_')
             )
             {
-                temp[northWest] = '_';
-                // promote pawn if in last row
-                swap(temp[index], temp[jumpNorthWest]);
+                swap(temp[index], temp[northWest]);
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
             // king/pawn southeast move
-            if( (southEast != 0) && (jumpSouthEast !=0) &&
+            if( (southEast != -1) &&
                 (temp[index] == king || temp[index] == pawn) &&
                 (temp[southEast] == '_')
             )
             {
-                temp[southEast] = '_';
+                swap(temp[index], temp[southEast]);
+                
                 // promote pawn if in last row
-                if( (temp[index] == pawn) && (jumpSouthEast >= 28) )
+                if( (temp[southEast] == pawn) && (southEast >= 28) )
                 {
-                    temp[index] = king;
+                    temp[southEast] = king;
                 }
-                swap(temp[index], temp[jumpSouthEast]);
+                
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
             // king/pawn southwest move
-            if( (southEast != 0) && (jumpSouthWest !=0) &&
+            if( (southWest != -1) &&
                 (temp[index] == king || temp[index] == pawn) &&
                 (temp[southWest] == '_')
             )
             {
-                temp[southWest] = '_';
+                swap(temp[index], temp[southWest]);
+                
                 // promote pawn if in last row
-                if( (temp[index] == pawn) && (jumpSouthWest >= 28) )
+                if( (temp[southWest] == pawn) && (southWest >= 28) )
                 {
-                    temp[index] = king;
+                    temp[southWest] = king;
                 }
-                swap(temp[index], temp[jumpSouthWest]);
+                
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
         }
-        else // black
+        // ######################################## BLACK MOVES ########################################
+        else
         {
-            char pawn = 'r'; char king = 'R';
-            char enemyPawn = 'b'; char enemyKing = 'B';
+            char pawn = 'b'; char king = 'B';
+            char enemyPawn = 'r'; char enemyKing = 'R';
             
-            // king southeast mov
-            if( (southEast != 0) && (jumpSouthEast !=0) &&
+            // king southeast move
+            if( (southEast != -1) &&
                 (temp[index] == king) &&
                 (temp[southEast] == '_')
             )
             {
-                temp[southEast] = '_';
-                swap(temp[index], temp[jumpSouthEast]);
+                swap(temp[index], temp[southEast]);
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
-            // king southwest mov
-            if( (southEast != 0) && (jumpSouthWest !=0) &&
+            // king southwest move
+            if( (southWest != -1) &&
                 (temp[index] == king) &&
                 (temp[southWest] == '_')
             )
             {
-                temp[southWest] = '_';
-                swap(temp[index], temp[jumpSouthWest]);
+                swap(temp[index], temp[southWest]);
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
             // king/pawn northeast move
-            if( (northEast != 0) && (jumpNorthEast !=0) &&
+            if( (northEast != -1) &&
                 (temp[index] == king || temp[index] == pawn) &&
                 (temp[northEast] == '_')
             )
             {
-                temp[northEast] = '_';
+                swap(temp[index], temp[northEast]);
+                
                 // promote pawn if in last row
-                if( (temp[index] == pawn) && (jumpNorthEast >= 28) )
+                if( (temp[northEast] == pawn) && (northEast <= 3) )
                 {
-                    temp[index] = king;
+                    temp[northEast] = king;
                 }
-                swap(temp[index], temp[jumpNorthEast]);
+                
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
             // king/pawn northwest move
-            if( (northWest != 0) && (jumpNorthWest !=0) &&
+            if( (northWest != -1) &&
                 (temp[index] == king || temp[index] == pawn) &&
                 (temp[northWest] == '_')
             )
             {
-                temp[northWest] = '_';
+                swap(temp[index], temp[northWest]);
+                
                 // promote pawn if in last row
-                if( (temp[index] == pawn) && (jumpNorthWest >= 28) )
+                if( (temp[northWest] == pawn) && (northWest <= 3) )
                 {
-                    temp[index] = king;
+                    temp[northWest] = king;
                 }
-                swap(temp[index], temp[jumpNorthWest]);
+                
                 moves.push_back(temp);
                 temp = currentBoard;
-                canJump = true;
             }
         }
     }
     
-    return moves;
+    return didJump;
 }
 
 // checks every spot on the board for valid moves
 // returns a vector of board strings
 vector<string> NeuralNetwork::generateMovesHelper(const string currentBoard, vector<pair<int,char>> &pieces, bool isRed)
 {
-    vector<string> jumpsMoves;
+    vector<string> jumps;
+    vector<string> moves;
+    
+    bool canJump = false;
     
     for (int i = 0; i < pieces.size(); ++i)
     {
         pair<int,char> piece = pieces[i];
-        vector<string> temp = pieceMove(currentBoard, piece.second, piece.first, isRed);
-        jumpsMoves.insert(jumpsMoves.end(), temp.begin(), temp.end());
+        
+        pieceMove(jumps, moves, currentBoard, piece.second, piece.first, isRed, canJump);
     }
-
-    sort(jumpsMoves.begin(), jumpsMoves.end());
-    jumpsMoves.erase(unique(jumpsMoves.begin(), jumpsMoves.end()), jumpsMoves.end());
-    return jumpsMoves;
+    
+    if(jumps.size() == 0)
+    {
+        return moves;
+    }
+    else
+    {
+        // jumps can be duplicated (jumping in a circle), so remove them
+        sort(jumps.begin(), jumps.end());
+        jumps.erase(unique(jumps.begin(), jumps.end()), jumps.end());
+        return jumps;
+    }
 }
 
 vector<string> NeuralNetwork::generateMoves(string board, bool isRed)
@@ -733,7 +801,7 @@ vector<string> NeuralNetwork::generateMoves(string board, bool isRed)
     vector<pair<int,char>> pieces;
     
     // Populate pieces
-    for(int i=0; i < board.size(); ++i)
+    for(int i = 0; i < board.size(); ++i)
     {
         switch(board[i])
         {

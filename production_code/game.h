@@ -16,7 +16,7 @@ class Game
 {
 public:
     Game(NeuralNetwork &redPlayer, NeuralNetwork &blackPlayer);
-    void gameLoop();
+    void gameLoop(string filename);
 
 private:
     void writeGameHistoryToFile(const string subdirectory, string weightFilename);
@@ -24,6 +24,7 @@ private:
 
     NeuralNetwork *_redPlayerPtr;
     NeuralNetwork *_blackPlayerPtr;
+    
     string _currentBoard;
     vector<string> _gameHistory;
 };

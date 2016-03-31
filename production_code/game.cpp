@@ -15,6 +15,7 @@ using std::string;
 #include <algorithm>
 using std::reverse;
 using std::replace;
+#include <sstream>
 using std::ostringstream;
 #include <fstream>
 using std::ifstream;
@@ -69,7 +70,7 @@ void Game::writeGameHistoryToFile(const string subdirectory, string weightFilena
     }
 }
 
-void Game::gameLoop()
+void Game::gameLoop(string filename)
 {
     string win = "";
     int turns = 0;
@@ -81,7 +82,7 @@ void Game::gameLoop()
         if(redPlayerTurn)
         {
             _currentBoard = _redPlayerPtr->treeSearch(_currentBoard, 4);
-            if(_currentBoard == "" || turns >= 100)
+            if(_currentBoard == "")
             {
                 win = "black";
             }
@@ -89,7 +90,7 @@ void Game::gameLoop()
         else
         {
             _currentBoard = _blackPlayerPtr->treeSearch(_currentBoard, 4);
-            if(_currentBoard == "" || turns >= 100)
+            if(_currentBoard == "")
             {
                 win = "red";
             }
@@ -107,8 +108,11 @@ void Game::gameLoop()
     }
     else if(win == "black")
     {
-        _redPlayerPtr->_performance -= 2;
-        _blackPlayerPtr->_performance += 1;
+        //_redPlayerPtr->_performance -= 2;
+        //_blackPlayerPtr->_performance += 1;
+        
+        _redPlayerPtr->_performance = 200;
+        _blackPlayerPtr->_performance = 100;
     }
     else
     {
@@ -116,5 +120,5 @@ void Game::gameLoop()
         _blackPlayerPtr->_performance -= 1;
     }
     
-    writeGameHistoryToFile("gameHistories", "game");
+    writeGameHistoryToFile("gameHistories", filename);
 }

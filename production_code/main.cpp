@@ -23,7 +23,7 @@ using Eigen::initParallel;
 using Eigen::setNbThreads;
 using Eigen::nbThreads;
 
-#define NNSIZE 100
+#define NNSIZE 10
 
 int main(int argc, char *argv[])
 {
@@ -97,14 +97,16 @@ int main(int argc, char *argv[])
     }
     */
     
-
-
-    /*
+    
+    
+    
+    
+    
     //TESTING TOURNAMENT
-    vector<NeuralNetwork> NNs(NNSIZE);
-    for (int i = 0; i < NNs.size(); ++i)
+    vector<NeuralNetwork> NNs;
+    for (int i = 0; i < NNSIZE; ++i)
     {
-        NNs[i] = NeuralNetwork(inputs);
+        NNs.push_back(NeuralNetwork(inputs));
     }
     
     Tournament tourney(NNs);
@@ -115,7 +117,8 @@ int main(int argc, char *argv[])
     {
         cout << "NN #" << i << ": "<< NNs[i]._performance << endl;
     }
-    */
+    
+    
     
     /*
     //TESTING GAME
@@ -139,16 +142,18 @@ int main(int argc, char *argv[])
     //cout << test.evaluateBoard("rrrrrrrrrrrr________bbbbbbbbbbbb") << endl;
     
     // starts getting slow at 7
-    cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 7) << endl;
+    cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 8) << endl;
     */
     
     
-    
+    /*
     //TESTING GENERATEMOVES
     NeuralNetwork test(inputs);
+    test._isRed = true;
+    string nextBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb";
     for(int i = 0; i < 10; ++i)
     {
-        vector<string> temp = test.generateMoves("rrrrrrrrrrrr________bbbbbbbbbbbb", test._isRed);
+        vector<string> temp = test.generateMoves(nextBoard, test._isRed);
         
         cout << "MOVE " << i << ": " << endl;
         for(auto board : temp)
@@ -157,8 +162,9 @@ int main(int argc, char *argv[])
         }
         
         test._isRed = !test._isRed;
+        nextBoard = temp[0];
     }
-    
+    */
     
     /*
     //TESTING EVOLUTION

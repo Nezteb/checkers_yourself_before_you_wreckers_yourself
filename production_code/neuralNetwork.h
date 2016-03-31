@@ -48,7 +48,7 @@ public:
 private:
     static double _sigmoid(double x);
     
-    vector<string> pieceMove(const string currentBoard, char piece, int index, bool isRed);
+    bool pieceMove(vector<string> &jumps, vector<string> &moves, const string currentBoard, char piece, int index, bool isRed, bool &canJump);
     vector<string> generateMovesHelper(const string currentBoard, vector<pair<int,char>> &pieces, bool isRed);
     
     double negaScout(Node *currentNode, int depth, double alpha, double beta, bool isRed);
