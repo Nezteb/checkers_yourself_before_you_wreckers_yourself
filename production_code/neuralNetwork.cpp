@@ -870,13 +870,6 @@ double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, doub
     }
     
     child = NULL;
-    
-    //for(auto child : currentNode->childNodes)
-    //{
-    //    delete child; // kill the child
-    //}
-    
-    //delete currentNode;
 
     return alpha;
 }
@@ -903,8 +896,6 @@ string NeuralNetwork::treeSearch(string rootBoard, int depth) // called once
     if(root->childNodes.size() == 0 || depth == 0)
     {
         return "";
-        //return root->board;
-        //return evaluateBoard(root.board);
     }
 
     for(int i = 0; i < root->childNodes.size(); ++i) // for each child node
@@ -943,6 +934,7 @@ string NeuralNetwork::treeSearch(string rootBoard, int depth) // called once
     }
     
     child = NULL;
+    delete root;
 
     return bestBoard;
 }

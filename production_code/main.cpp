@@ -6,7 +6,7 @@
 // g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
 // MAC (requires: brew install gcc --without-multilib)
-// g++-5 -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
+// g++-5 -w -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
 #include "neuralNetwork.h"
 #include "tournament.h"
@@ -23,7 +23,7 @@ using Eigen::initParallel;
 using Eigen::setNbThreads;
 using Eigen::nbThreads;
 
-#define NNSIZE 10
+#define NNSIZE 5
 
 int main(int argc, char *argv[])
 {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     
     
     
-    
+    /*
     //TESTING TOURNAMENT
     vector<NeuralNetwork> NNs;
     for (int i = 0; i < NNSIZE; ++i)
@@ -117,29 +117,32 @@ int main(int argc, char *argv[])
     {
         cout << "NN #" << i << ": "<< NNs[i]._performance << endl;
     }
+    */
     
     
     
-    /*
     //TESTING GAME
-    NeuralNetwork red(inputs);
-    NeuralNetwork black(inputs);
+    NeuralNetwork *red = new NeuralNetwork(inputs);
+    NeuralNetwork *black = new NeuralNetwork(inputs);
     
     Game gameTest(red, black);
     
-    gameTest.gameLoop();
+    gameTest.gameLoop("test");
     
-    cout << "NN red  : "<< red._performance << endl;
-    cout << "NN black: "<< black._performance << endl;
-    */
+    cout << "NN red  : "<< red->_performance << endl;
+    cout << "NN black: "<< black->_performance << endl;
     
-    /*
+    delete red;
+    delete black;
+    
+
+    /*    
     //TESTING NEURALNETWORK
     NeuralNetwork test(inputs);
     test._isRed = true;
     
     cout << "NormalBoard best move:" << endl;
-    //cout << test.evaluateBoard("rrrrrrrrrrrr________bbbbbbbbbbbb") << endl;
+    cout << test.evaluateBoard("rrrrrrrrrrrr________bbbbbbbbbbbb") << endl;
     
     // starts getting slow at 7
     cout << test.treeSearch("rrrrrrrrrrrr________bbbbbbbbbbbb", 8) << endl;

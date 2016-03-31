@@ -7,6 +7,9 @@
 #include "tournament.h"
 #include "neuralNetwork.h"
 
+#include <iostream>
+using std::cout;
+using std::endl;
 #include <sstream>
 using std::ostringstream;
 
@@ -21,6 +24,9 @@ void Tournament::tournamentLoop()
     
     srand (time(NULL));
     
+    NeuralNetwork *pointer1;
+    NeuralNetwork *pointer2;
+    
     for (int i = 0; i < _neuralNetworks.size(); ++i)
     {
         for(int j = 0; j < numGames; ++j)
@@ -30,16 +36,24 @@ void Tournament::tournamentLoop()
             
             int randNN = rand() % (_neuralNetworks.size() - 1); // omit last NN
             
+            cout << "NEURAL NETWORK " << i << " vs NEURAL NETWORK " << (i == randNN ? _neuralNetworks.size() : randNN) << ", GAME: " << j << endl;
+            
             if (i == randNN) //if the NN is the already redPlayer
-            {                                  
-                 Game newGame = Game(_neuralNetworks[i], _neuralNetworks[(_neuralNetworks.size() - 1)]); //use last NN
-                 newGame.gameLoop(stream.str()); //run game
+            {
+                pointer1 = &_neuralNetworks[i];
+                pointer2 = &_neuralNetworks[(_neuralNetworks.size() - 1)];
             }
             else
             {
-                Game newGame = Game(_neuralNetworks[i], _neuralNetworks[randNN]);
-                newGame.gameLoop(stream.str()); //run game
+                pointer1 = &_neuralNetworks[i];
+                pointer2 = &_neuralNetworks[randNN];
             }
+            
+            Game newGame = Game(pointer1, pointer2); //use last NN
+            newGame.gameLoop(stream.str()); //run game
         }
     }
+    
+    pointer1 = NULL;
+    pointer2 = NULL;
 }

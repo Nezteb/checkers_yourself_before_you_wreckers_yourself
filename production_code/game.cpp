@@ -23,10 +23,10 @@ using std::ofstream;
 #include <sys/stat.h> // for mkdir
 #include <sys/types.h>
 
-Game::Game(NeuralNetwork &redPlayer, NeuralNetwork &blackPlayer)
+Game::Game(NeuralNetwork *redPlayer, NeuralNetwork *blackPlayer)
 {
-    _redPlayerPtr = &redPlayer;
-    _blackPlayerPtr = &blackPlayer;
+    _redPlayerPtr = redPlayer;
+    _blackPlayerPtr = blackPlayer;
     
     _redPlayerPtr->_isRed = true;
     _blackPlayerPtr->_isRed = false;
@@ -44,7 +44,7 @@ void Game::writeGameHistoryToFile(const string subdirectory, string weightFilena
 
     if(stat(subdirectory.c_str(), &info) != 0)
     {
-        cout << "Cannot access: " << subdirectory << endl;
+        cout << "Cannot access: " << subdirectory << " (it probably already exists)" << endl;
     }
     else if(!(info.st_mode & S_IFDIR))
     {
@@ -78,6 +78,8 @@ void Game::writeGameHistoryToFile(const string subdirectory, string weightFilena
 
 void Game::gameLoop(string filename)
 {
+    //cout << "STARTING GAME" << endl;
+    
     string win = "";
     int turns = 0;
     bool redPlayerTurn = true; // red goes first
@@ -85,43 +87,50 @@ void Game::gameLoop(string filename)
     
     while (win == "" || turns <= 100)
     {
+        //cout << "TURN " << turns << endl;
         if(redPlayerTurn)
         {
-            _currentBoard = _redPlayerPtr->treeSearch(_currentBoard, 2);
+            //cout << "RED MOVE" << endl;
+            _currentBoard = _redPlayerPtr->treeSearch(_currentBoard, 8);
             if(_currentBoard == "")
             {
                 win = "black";
             }
+            //cout << "END RED MOVE" << endl;
         }
         else
         {
-            _currentBoard = _blackPlayerPtr->treeSearch(_currentBoard, 2);
+            //cout << "BLACK MOVE" << endl;
+            _currentBoard = _blackPlayerPtr->treeSearch(_currentBoard, 8);
             if(_currentBoard == "")
             {
                 win = "red";
             }
+            //cout << "END BLACK MOVE" << endl;
         }
         
         _gameHistory.push_back(_currentBoard);
         redPlayerTurn = !redPlayerTurn;
+        
+        //cout << "END TURN " << turns << endl;
         ++turns;
     }
     
     if(win == "red")
     {
+        cout << "WIN RED" << endl;
         _redPlayerPtr->_performance += 1;
         _blackPlayerPtr->_performance -= 2;
     }
     else if(win == "black")
     {
-        //_redPlayerPtr->_performance -= 2;
-        //_blackPlayerPtr->_performance += 1;
-        
-        _redPlayerPtr->_performance = 200;
-        _blackPlayerPtr->_performance = 100;
+        cout << "WIN BLACK" << endl;
+        _redPlayerPtr->_performance -= 2;
+        _blackPlayerPtr->_performance += 1;
     }
     else
     {
+        cout << "DRAW" << endl;
         _redPlayerPtr->_performance -= 1;
         _blackPlayerPtr->_performance -= 1;
     }
