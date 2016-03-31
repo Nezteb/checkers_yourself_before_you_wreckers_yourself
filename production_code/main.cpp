@@ -2,11 +2,11 @@
 // Noah Betzen & Lonny Strunk
 // CS 405
 
-// Compile and run with:
+// LINUX
 // g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
-// With no parallelism or threads:
-// g++ -Ofast --std=c++1y -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time ./main.o 32 40 10 1
+// MAC (requires: brew install gcc --without-multilib)
+// g++-5 -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
 #include "neuralNetwork.h"
 #include "tournament.h"
@@ -57,10 +57,10 @@ int main(int argc, char *argv[])
 
     /*
     //ACTUAL NEURALNETWORK EVOLUTION 
-    vector<NeuralNetwork> NNs(NNSIZE);
-    for (int i = 0; i < NNs.size(); ++i)
+    vector<NeuralNetwork> NNs();
+    for (int i = 0; i < NNSIZE; ++i)
     {
-        NNs[i] = NeuralNetwork(inputs);
+        NNs.push_back( NeuralNetwork(inputs) );
     }
     
     int generationNum = 0;
@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
         tourney.tournamentLoop();
         
         // Sort the neural networks by performance in the tournament
-        sort(NNs.begin(), NNs.end(), [](NeuralNetwork &a, NeuralNetwork &b)
-        {b._performance < a._performance;});
+        sort(NNs.begin(), NNs.end(), [&](NeuralNetwork a, NeuralNetwork b)
+        {a._performance > b._performance;});
         
         // Overwrite and generate new children
         int halfNNs = NNs.size() / 2;

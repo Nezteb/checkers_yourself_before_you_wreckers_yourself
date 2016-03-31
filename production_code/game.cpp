@@ -32,6 +32,12 @@ Game::Game(NeuralNetwork &redPlayer, NeuralNetwork &blackPlayer)
     _blackPlayerPtr->_isRed = false;
 }
 
+Game::~Game()
+{
+    _redPlayerPtr = NULL;
+    _blackPlayerPtr = NULL;
+}
+
 void Game::writeGameHistoryToFile(const string subdirectory, string weightFilename)
 {
     struct stat info;
@@ -81,7 +87,7 @@ void Game::gameLoop(string filename)
     {
         if(redPlayerTurn)
         {
-            _currentBoard = _redPlayerPtr->treeSearch(_currentBoard, 4);
+            _currentBoard = _redPlayerPtr->treeSearch(_currentBoard, 2);
             if(_currentBoard == "")
             {
                 win = "black";
@@ -89,7 +95,7 @@ void Game::gameLoop(string filename)
         }
         else
         {
-            _currentBoard = _blackPlayerPtr->treeSearch(_currentBoard, 4);
+            _currentBoard = _blackPlayerPtr->treeSearch(_currentBoard, 2);
             if(_currentBoard == "")
             {
                 win = "red";

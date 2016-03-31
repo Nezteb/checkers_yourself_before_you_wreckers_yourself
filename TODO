@@ -1,22 +1,24 @@
 ----------
 TODO LIST:
     - Create NetworkGame derived class from Game (weights for network activity, calculates move, sends move, etc.)
-    
-    - Figure out who won a game, modify performance score
-    
-    - Implement Tournament class with functions
-    
-    - Store NeuralNetworks as C++11 std::array (in tournament) http://stackoverflow.com/a/11134514
 
+    - Store NeuralNetworks as C++11 std::array (in tournament) http://stackoverflow.com/a/11134514
+    
+    - Optimize memory usage
+    
+    - Get a working tournament
+    
+    - Test training
+    
+    - Do the training
+    
 ----------
 Noah:
-    - Implement color swapping logic in Game class (see gameplay.cpp in test_code)
-    
-    - Fix broken include paths (caused by repo restructure)
+    - Order the boards by best score in treeSearch
 
 ----------
 Lonny:
-
+    - Figure out who won a game, modify performance score
 
 ----------
 DONE:
@@ -31,3 +33,9 @@ DONE:
     - Create NeuralNetwork member function: treeSearch (see treeSearch.cpp in test_code)
     
     - Board evluation needs to go inside NeuralNetwork class
+
+    - Implement color swapping logic in Game class (see gameplay.cpp in test_code)
+    
+    - Fix broken include paths (caused by repo restructure)
+    
+    - Implement Tournament class with functions

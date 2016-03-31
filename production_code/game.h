@@ -17,6 +17,8 @@ class Game
 public:
     Game(NeuralNetwork &redPlayer, NeuralNetwork &blackPlayer);
     void gameLoop(string filename);
+    
+    ~Game();
 
 private:
     void writeGameHistoryToFile(const string subdirectory, string weightFilename);
