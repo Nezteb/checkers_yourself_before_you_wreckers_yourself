@@ -81,6 +81,7 @@ struct Node
         Node *temp = new Node(newBoard);
         //temp->parentNode = this;
         childNodes.push_back(temp);
+        temp = NULL;
     }
     
     string board;
@@ -829,7 +830,7 @@ double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, doub
     for(int i = 0; i < boards.size(); ++i) // create the vector of child nodes out of generated boards
     {
         // SORT BOARDS/NODES HERE BEFORE ADDING THEM TO THE TREE
-        currentNode->createChild(boards[i]);
+        //currentNode->createChild(boards[i]);
     }
     
     // if we are a leaf or have reached our max depth
@@ -868,8 +869,6 @@ double NeuralNetwork::negaScout(Node *currentNode, int depth, double alpha, doub
             break; // prune
         }
     }
-    
-    child = NULL;
 
     return alpha;
 }

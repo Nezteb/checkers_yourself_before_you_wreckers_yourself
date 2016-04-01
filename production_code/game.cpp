@@ -44,7 +44,7 @@ void Game::writeGameHistoryToFile(const string subdirectory, string weightFilena
 
     if(stat(subdirectory.c_str(), &info) != 0)
     {
-        cout << "Cannot access: " << subdirectory << " (it probably already exists)" << endl;
+        //cout << "Cannot access: " << subdirectory << " (it probably already exists)" << endl;
     }
     else if(!(info.st_mode & S_IFDIR))
     {
@@ -58,7 +58,7 @@ void Game::writeGameHistoryToFile(const string subdirectory, string weightFilena
     stringStream << subdirectory << "/" << weightFilename << ".txt";
     string fileName = stringStream.str();
     
-    cout << "\nAttempting to write to file: " << fileName << endl;
+    //cout << "\nAttempting to write to file: " << fileName << endl;
     
     ofstream file(fileName, ofstream::out | ofstream::trunc);
 
@@ -72,7 +72,7 @@ void Game::writeGameHistoryToFile(const string subdirectory, string weightFilena
     }
     else
     {
-        cout << "Could not open: " << fileName << endl;
+        //cout << "Could not open: " << fileName << endl;
     }
 }
 
@@ -85,8 +85,13 @@ void Game::gameLoop(string filename)
     bool redPlayerTurn = true; // red goes first
     _currentBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb"; // starting board
     
-    while (win == "" || turns <= 100)
+    while (win == "")
     {
+        if(turns >= 100)
+        {
+            break;
+        }
+        
         //cout << "TURN " << turns << endl;
         if(redPlayerTurn)
         {
@@ -113,24 +118,24 @@ void Game::gameLoop(string filename)
         redPlayerTurn = !redPlayerTurn;
         
         //cout << "END TURN " << turns << endl;
-        ++turns;
+        turns += 1;
     }
     
     if(win == "red")
     {
-        cout << "WIN RED" << endl;
+        //cout << "WIN RED" << endl;
         _redPlayerPtr->_performance += 1;
         _blackPlayerPtr->_performance -= 2;
     }
     else if(win == "black")
     {
-        cout << "WIN BLACK" << endl;
+        //cout << "WIN BLACK" << endl;
         _redPlayerPtr->_performance -= 2;
         _blackPlayerPtr->_performance += 1;
     }
     else
     {
-        cout << "DRAW" << endl;
+        //cout << "DRAW" << endl;
         _redPlayerPtr->_performance -= 1;
         _blackPlayerPtr->_performance -= 1;
     }

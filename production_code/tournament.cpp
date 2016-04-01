@@ -15,7 +15,19 @@ using std::ostringstream;
 
 Tournament::Tournament(vector<NeuralNetwork> &neuralNetworks) 
 {
-    _neuralNetworks = neuralNetworks;
+    for(auto &neuralNetwork : neuralNetworks)
+    {
+        _neuralNetworks.push_back(&neuralNetwork);
+    }
+    
+}
+
+Tournament::~Tournament() 
+{
+    for(auto neuralNetworkPtr : _neuralNetworks)
+    {
+        neuralNetworkPtr = NULL;
+    }
 }
 
 void Tournament::tournamentLoop()
@@ -36,24 +48,24 @@ void Tournament::tournamentLoop()
             
             int randNN = rand() % (_neuralNetworks.size() - 1); // omit last NN
             
-            cout << "NEURAL NETWORK " << i << " vs NEURAL NETWORK " << (i == randNN ? _neuralNetworks.size() : randNN) << ", GAME: " << j << endl;
+            //cout << "NEURAL NETWORK " << i << " vs NEURAL NETWORK " << (i == randNN ? _neuralNetworks.size()-1 : randNN) << ", GAME: " << j << endl;
             
             if (i == randNN) //if the NN is the already redPlayer
             {
-                pointer1 = &_neuralNetworks[i];
-                pointer2 = &_neuralNetworks[(_neuralNetworks.size() - 1)];
+                pointer1 = _neuralNetworks[i];
+                pointer2 = _neuralNetworks[(_neuralNetworks.size() - 1)];
             }
             else
             {
-                pointer1 = &_neuralNetworks[i];
-                pointer2 = &_neuralNetworks[randNN];
+                pointer1 = _neuralNetworks[i];
+                pointer2 = _neuralNetworks[randNN];
             }
             
             Game newGame = Game(pointer1, pointer2); //use last NN
             newGame.gameLoop(stream.str()); //run game
+            
+            pointer1 = NULL;
+            pointer2 = NULL;
         }
     }
-    
-    pointer1 = NULL;
-    pointer2 = NULL;
 }

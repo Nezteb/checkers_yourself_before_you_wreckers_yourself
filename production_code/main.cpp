@@ -23,7 +23,7 @@ using Eigen::initParallel;
 using Eigen::setNbThreads;
 using Eigen::nbThreads;
 
-#define NNSIZE 5
+#define NNSIZE 100
 
 int main(int argc, char *argv[])
 {
@@ -55,35 +55,44 @@ int main(int argc, char *argv[])
     }
     cout << endl;
 
-    /*
+    
     //ACTUAL NEURALNETWORK EVOLUTION 
-    vector<NeuralNetwork> NNs();
+    vector<NeuralNetwork> NNs;
     for (int i = 0; i < NNSIZE; ++i)
     {
-        NNs.push_back( NeuralNetwork(inputs) );
+        NNs.push_back(NeuralNetwork(inputs));
     }
     
     int generationNum = 0;
     while(true)
     {
-        cout << "Generation #" << generationNum << endl;
+        cout << "GENERATION #" << generationNum << endl;
         // Start the tournament
         Tournament tourney(NNs);
         tourney.tournamentLoop();
         
         // Sort the neural networks by performance in the tournament
-        sort(NNs.begin(), NNs.end(), [&](NeuralNetwork a, NeuralNetwork b)
-        {a._performance > b._performance;});
+        sort(NNs.begin(), NNs.end(), [](const NeuralNetwork &a, const NeuralNetwork &b)
+        {
+            return a._performance > b._performance;
+        });
+        
+        cout << "TOP TEN OF GENERATION #" << generationNum << endl;
+        for(int i = 0; i < 10; ++i)
+        {
+            cout << "NN #" << i << ": "<< NNs[i]._performance << endl;
+        }
         
         // Overwrite and generate new children
         int halfNNs = NNs.size() / 2;
+        
         for(int i = 0; i < halfNNs; ++i)
         {
             NNs[halfNNs + i] = NNs[i].spawnChild();
         }
         
         // Zero out all of the new boards 
-        for(auto & nn : NNs)
+        for(auto &nn : NNs)
         {
             nn._performance = 0;
         }
@@ -95,7 +104,7 @@ int main(int argc, char *argv[])
         // Increment generation
         generationNum += 1;
     }
-    */
+    
     
     
     
@@ -121,21 +130,33 @@ int main(int argc, char *argv[])
     
     
     
+    
+    
+    /*
     //TESTING GAME
+    //cout << "CREATING NEURAL NETWORKS" << endl;
     NeuralNetwork *red = new NeuralNetwork(inputs);
     NeuralNetwork *black = new NeuralNetwork(inputs);
+    //cout << "NEURAL NETWORKS CREATED" << endl;
     
+    //cout << "CREATING GAME" << endl;
     Game gameTest(red, black);
+    //cout << "GAME CREATED" << endl;
     
+    //cout << "STARTING GAME LOOP" << endl;
     gameTest.gameLoop("test");
+    //cout << "GAME LOOP ENDED" << endl;
     
     cout << "NN red  : "<< red->_performance << endl;
     cout << "NN black: "<< black->_performance << endl;
     
     delete red;
     delete black;
+    */
     
-
+    
+    
+    
     /*    
     //TESTING NEURALNETWORK
     NeuralNetwork test(inputs);

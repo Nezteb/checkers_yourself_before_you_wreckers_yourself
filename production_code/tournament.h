@@ -19,10 +19,12 @@ class Tournament
 {
 public:
     Tournament(vector<NeuralNetwork> &neuralNetworks);
+    ~Tournament();
+    
     void tournamentLoop();
     
 private:
-    vector<NeuralNetwork> _neuralNetworks;
+    vector<NeuralNetwork*> _neuralNetworks;
     
 };
 
