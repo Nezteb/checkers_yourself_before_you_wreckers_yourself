@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
         
         if(NNs[0]._performance >= bestPerformance)
         {
+            NNs[0].writeWeightsToFile("generations", "bestSoFar");
             bestPerformance = NNs[0]._performance;
             bestGeneration = generationNum;
         }
@@ -105,11 +106,13 @@ int main(int argc, char *argv[])
         cout << "Best generation and performance so far: GEN: " << bestGeneration << ", PERF: " << bestPerformance << endl;
         
         // Overwrite and generate new children
-        int halfNNs = NNs.size() / 2;
+        int onethirdNNs = NNs.size() / 3;
+        int twothirdNNs = (NNs.size() * 2) / 3;
         
-        for(int i = 0; i < halfNNs; ++i)
+        for(int i = 0; i < onethirdNNs; ++i)
         {
-            NNs[halfNNs + i] = NNs[i].spawnChild();
+            NNs[onethirdNNs + i] = NNs[i].spawnChild();
+            NNs[twothirdNNs + i] = NeuralNetwork(inputs);
         }
         
         // Zero out all of the new boards 
@@ -117,6 +120,8 @@ int main(int argc, char *argv[])
         {
             nn._performance = 0;
         }
+        
+        int status = system("rm -rf ./generations/gen*");
         
         // Save/write NeuralNetworks to file
         ostringstream stringStream1;

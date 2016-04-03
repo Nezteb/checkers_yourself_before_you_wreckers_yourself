@@ -23,6 +23,9 @@ using std::ofstream;
 #include <sys/stat.h> // for mkdir
 #include <sys/types.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 Game::Game(NeuralNetwork *redPlayer, NeuralNetwork *blackPlayer)
 {
     _redPlayerPtr = redPlayer;
@@ -53,6 +56,7 @@ void Game::writeGameHistoryToFile(string subdirectory, string weightFilename)
     
     // make the directory if it doesn't already exist
     const int dir_err = mkdir(subdirectory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
 
     ostringstream stringStream;
     stringStream << subdirectory << "/" << weightFilename << ".txt";
@@ -139,6 +143,8 @@ void Game::gameLoop(string directory, string filename)
         _redPlayerPtr->_performance -= 1;
         _blackPlayerPtr->_performance -= 1;
     }
+    
+    int status = system("rm -rf ./gameHistories/gen*");
     
     writeGameHistoryToFile(directory, filename);
 }
