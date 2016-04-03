@@ -16,12 +16,12 @@ class Game
 {
 public:
     Game(NeuralNetwork *redPlayer, NeuralNetwork *blackPlayer);
-    void gameLoop(string filename);
+    void gameLoop(string directory, string filename);
     
     ~Game();
 
 private:
-    void writeGameHistoryToFile(const string subdirectory, string weightFilename);
+    void writeGameHistoryToFile(string subdirectory, string weightFilename);
     string invertBoard(string board);
 
     NeuralNetwork *_redPlayerPtr;

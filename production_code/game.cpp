@@ -38,7 +38,7 @@ Game::~Game()
     _blackPlayerPtr = NULL;
 }
 
-void Game::writeGameHistoryToFile(const string subdirectory, string weightFilename)
+void Game::writeGameHistoryToFile(string subdirectory, string weightFilename)
 {
     struct stat info;
 
@@ -72,11 +72,11 @@ void Game::writeGameHistoryToFile(const string subdirectory, string weightFilena
     }
     else
     {
-        //cout << "Could not open: " << fileName << endl;
+        cout << "Could not open: " << fileName << endl;
     }
 }
 
-void Game::gameLoop(string filename)
+void Game::gameLoop(string directory, string filename)
 {
     //cout << "STARTING GAME" << endl;
     
@@ -140,5 +140,5 @@ void Game::gameLoop(string filename)
         _blackPlayerPtr->_performance -= 1;
     }
     
-    writeGameHistoryToFile("gameHistories", filename);
+    writeGameHistoryToFile(directory, filename);
 }

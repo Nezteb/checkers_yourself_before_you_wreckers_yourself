@@ -35,8 +35,8 @@ public:
     void print();
     double evaluateBoard(const string &board);
     
-    MatrixXXd readWeightFromFile(const string subdirectory, string weightFilename);
-    void writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename);
+    void readWeightsFromFile(const string subdirectory, const string weightFilename);
+    void writeWeightsToFile(const string subdirectory, const string weightFilename);
     
     vector<string> generateMoves(string board, bool isRed);
     

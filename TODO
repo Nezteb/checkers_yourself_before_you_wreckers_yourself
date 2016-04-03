@@ -4,10 +4,6 @@ TODO LIST:
 
     - Store NeuralNetworks as C++11 std::array (in tournament) http://stackoverflow.com/a/11134514
     
-    - Optimize memory usage
-    
-    - Get a working tournament
-    
     - Test training
     
     - Do the training
@@ -18,10 +14,16 @@ Noah:
 
 ----------
 Lonny:
-    - Figure out who won a game, modify performance score
+    
 
 ----------
 DONE:
+    - Figure out who won a game, modify performance score
+
+    - Optimize memory usage
+    
+    - Get a working tournament
+    
     - Create NeuralNetwork member function: saveWeights (see writeMatriciesToFile.cpp in test_code)
     
     - Create NeuralNetwork member function: generateBoards (see boardGeneration.cpp in test_code)

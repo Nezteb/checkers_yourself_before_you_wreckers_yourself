@@ -1,3 +1,7 @@
+gameHistories/
+generations/
+old/
+
 # Compiled Object files
 *.slo
 *.lo

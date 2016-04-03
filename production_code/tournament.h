@@ -21,7 +21,7 @@ public:
     Tournament(vector<NeuralNetwork> &neuralNetworks);
     ~Tournament();
     
-    void tournamentLoop();
+    void tournamentLoop(string directory);
     
 private:
     vector<NeuralNetwork*> _neuralNetworks;

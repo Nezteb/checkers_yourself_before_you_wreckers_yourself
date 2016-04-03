@@ -17,6 +17,10 @@ using std::cout;
 using std::endl;
 #include <algorithm>
 using std::sort;
+#include <string>
+using std::string;
+#include <sstream>
+using std::ostringstream;
 
 #include "../third_party/Eigen/Core"
 using Eigen::initParallel;
@@ -63,13 +67,21 @@ int main(int argc, char *argv[])
         NNs.push_back(NeuralNetwork(inputs));
     }
     
+    int bestGeneration = 0;
+    int bestPerformance = 0;
+    
     int generationNum = 0;
     while(true)
     {
         cout << "GENERATION #" << generationNum << endl;
+        
+        ostringstream stringStream0;
+        stringStream0 << "gameHistories/" << "gen" << generationNum;
+        string directory0 = stringStream0.str();
+        
         // Start the tournament
         Tournament tourney(NNs);
-        tourney.tournamentLoop();
+        tourney.tournamentLoop(directory0);
         
         // Sort the neural networks by performance in the tournament
         sort(NNs.begin(), NNs.end(), [](const NeuralNetwork &a, const NeuralNetwork &b)
@@ -80,8 +92,17 @@ int main(int argc, char *argv[])
         cout << "TOP TEN OF GENERATION #" << generationNum << endl;
         for(int i = 0; i < 10; ++i)
         {
-            cout << "NN #" << i << ": "<< NNs[i]._performance << endl;
+            cout << "NN #" << i << ": "<< NNs[i]._performance << "\t";
         }
+        cout << endl;
+        
+        if(NNs[0]._performance >= bestPerformance)
+        {
+            bestPerformance = NNs[0]._performance;
+            bestGeneration = generationNum;
+        }
+        
+        cout << "Best generation and performance so far: GEN: " << bestGeneration << ", PERF: " << bestPerformance << endl;
         
         // Overwrite and generate new children
         int halfNNs = NNs.size() / 2;
@@ -97,14 +118,24 @@ int main(int argc, char *argv[])
             nn._performance = 0;
         }
         
-        // Save/write best NeuralNetwork to file
-        //NNs[0].writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename);
-        //cout << NNs[0] << endl;
+        // Save/write NeuralNetworks to file
+        ostringstream stringStream1;
+        stringStream1 << "generations/" << "gen" << generationNum;
+        string directory1 = stringStream1.str();
         
+        for(int i = 0; i < NNs.size(); ++i)
+        {
+            ostringstream stringStream2;
+            stringStream2 << i;
+            string file = stringStream2.str();
+            
+            NNs[i].writeWeightsToFile(directory1, file);
+        }
+         
         // Increment generation
         generationNum += 1;
+        cout << endl;
     }
-    
     
     
     
@@ -122,6 +153,11 @@ int main(int argc, char *argv[])
     
     tourney.tournamentLoop();
     
+    sort(NNs.begin(), NNs.end(), [](const NeuralNetwork &a, const NeuralNetwork &b)
+    {
+        return a._performance > b._performance;
+    });
+    
     for(int i = 0; i < NNs.size(); ++i)
     {
         cout << "NN #" << i << ": "<< NNs[i]._performance << endl;
@@ -131,12 +167,18 @@ int main(int argc, char *argv[])
     
     
     
-    
     /*
     //TESTING GAME
     //cout << "CREATING NEURAL NETWORKS" << endl;
     NeuralNetwork *red = new NeuralNetwork(inputs);
     NeuralNetwork *black = new NeuralNetwork(inputs);
+    
+    const string name = "generations";
+    const string a = "0";
+    const string b = "8";
+    red->readWeightsFromFile(name, a);
+    black->readWeightsFromFile(name, b);
+    
     //cout << "NEURAL NETWORKS CREATED" << endl;
     
     //cout << "CREATING GAME" << endl;

@@ -146,17 +146,16 @@ NeuralNetwork::NeuralNetwork(vector<int> topology): _topology(topology)
     for(int i=0; i<_topology.size()-1; ++i) // weights
     {
         _weights.push_back( MatrixXXd(_topology[i], _topology[i+1]) );
+        
+        for(int j = 0; j < _weights[i].rows(); ++j)
+        {
+            for(int k = 0; k < _weights[i].cols(); ++k)
+            {
+                _weights[i](j, k) = dRand(0.0, 1.0);
+            }
+        }
+        
         _weights[i].setRandom();
-    }
-}
-
-void NeuralNetwork::feedForward()
-{
-    for(int j=1; j<_layers.size(); ++j) // go through all the layers
-    {
-        _layers[j].noalias() = _layers[j-1] * _weights[j-1]; // next layer = previous layer * weights in between
-
-        _layers[j].noalias() = _layers[j].unaryExpr(ptr_fun(&_sigmoid)); // apply sigmoid to layer
     }
 }
 
@@ -212,11 +211,12 @@ double NeuralNetwork::evaluateBoard(const string &board)
         }
     }
     
+    // feed forward
     for(int j=1; j<_layers.size(); ++j) // go through all the layers
     {
         // TODO: this is the slowest portion
         _layers[j].noalias() = _layers[j-1] * _weights[j-1]; // next layer = previous layer * weights in between
-
+        
         // TODO: faster way to do unary expressions?
         _layers[j].noalias() = _layers[j].unaryExpr(ptr_fun(_sigmoid)); // apply sigmoid to layer
     }
@@ -246,7 +246,7 @@ double NeuralNetwork::_sigmoid(double x)
 
 IOFormat CSV(Eigen::StreamPrecision, Eigen::DontAlignCols, ",", ",", "", "", "", "");
 
-MatrixXXd NeuralNetwork::readWeightFromFile(const string subdirectory, string weightFilename)
+void NeuralNetwork::readWeightsFromFile(const string subdirectory, const string weightFilename)
 {
     struct stat info;
 
@@ -267,50 +267,64 @@ MatrixXXd NeuralNetwork::readWeightFromFile(const string subdirectory, string we
     
     ifstream file(fileName, ifstream::in);
     
+    string numWeightsString;
     string rowsString;
     string colsString;
+    int numWeights;
     int rows;
     int cols;
     string tempString;
     
-    MatrixXXd *pointer ;
+    vector<MatrixXXd> allWeights;
+    MatrixXXd *pointer;
     
     if (file.is_open())
     {
-        getline(file, rowsString);
-        getline(file, colsString);
-        rows = stoi(rowsString);
-        cols = stoi(colsString);
+        getline(file, numWeightsString, '\n');
+        numWeights = stoi(numWeightsString);
         
-        MatrixXXd matrix(rows, cols);
-        pointer = &matrix;
-        
-        for(int j = 0; j < rows; ++j)
+        for(int i = 0; i < numWeights; ++i)
         {
-            for(int k = 0; k < cols; ++k)
+            getline(file, rowsString, '\n');
+            getline(file, colsString, '\n');
+            rows = stoi(rowsString);
+            cols = stoi(colsString);
+            
+            pointer = new MatrixXXd(rows, cols);
+            
+            for(int j = 0; j < rows; ++j)
             {
-                getline(file, tempString, ',');
-                matrix(j, k) = stof(tempString);
+                for(int k = 0; k < cols; ++k)
+                {
+                    getline(file, tempString, ',');
+                    (*pointer)(j, k) = stof(tempString);
+                }
             }
+            
+            getline(file, tempString, '\n'); // eat the last newline
+            
+            allWeights.push_back(*pointer);
+            
+            delete pointer;
         }
         
         file.close();
-        return matrix;
+        
+        _weights = allWeights;
     }
     else
     {
         cout << "Could not open: " << fileName << endl;
-        return MatrixXXd();
     }
 }
 
-void NeuralNetwork::writeWeightToFile(const string subdirectory, MatrixXXd weight, string weightFilename)
+void NeuralNetwork::writeWeightsToFile(const string subdirectory, const string weightFilename)
 {
     struct stat info;
 
     if(stat(subdirectory.c_str(), &info) != 0)
     {
-        cout << "Cannot access: " << subdirectory << endl;
+        //cout << "Cannot access: " << subdirectory << endl;
     }
     else if(!(info.st_mode & S_IFDIR))
     {
@@ -324,15 +338,18 @@ void NeuralNetwork::writeWeightToFile(const string subdirectory, MatrixXXd weigh
     stringStream << subdirectory << "/" << weightFilename << ".txt";
     string fileName = stringStream.str();
     
-    cout << "\nAttempting to write to file: " << fileName << endl;
-    
     ofstream file(fileName, ofstream::out | ofstream::trunc);
 
     if (file.is_open())
     {
-        file << weight.rows() << "\n";
-        file << weight.cols() << "\n";
-        file << weight.format(CSV);
+        file << _weights.size() << "\n"; // number of weights
+        
+        for(auto &weight: _weights)
+        {
+            file << weight.rows() << "\n";
+            file << weight.cols() << "\n";
+            file << weight.format(CSV) << "\n";
+        }
         
         file.close();
     }

@@ -30,9 +30,9 @@ Tournament::~Tournament()
     }
 }
 
-void Tournament::tournamentLoop()
+void Tournament::tournamentLoop(string directory)
 {
-    int numGames = 5;
+    int numGames = 20;
     
     srand (time(NULL));
     
@@ -62,7 +62,7 @@ void Tournament::tournamentLoop()
             }
             
             Game newGame = Game(pointer1, pointer2); //use last NN
-            newGame.gameLoop(stream.str()); //run game
+            newGame.gameLoop(directory, stream.str()); //run game
             
             pointer1 = NULL;
             pointer2 = NULL;
