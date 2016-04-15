@@ -28,6 +28,7 @@ class NeuralNetwork
 {
 public:
     NeuralNetwork(vector<int> topology);
+    NeuralNetwork(vector<int> topology, vector<MatrixXXd> layers, vector<MatrixXXd> weights);
     
     void feedForward();
     NeuralNetwork spawnChild();
@@ -45,6 +46,7 @@ public:
     int _performance;
     
     bool _isRed;
+    vector<MatrixXXd> _weights;
 private:
     static double _sigmoid(double x);
     
@@ -56,7 +58,7 @@ private:
     double _kingValue;
     vector<int> _topology;
     vector<MatrixXXd> _layers;
-    vector<MatrixXXd> _weights;
+    
 };
 
 #endif

@@ -19,8 +19,14 @@ using std::endl;
 using std::sort;
 #include <string>
 using std::string;
+using std::to_string;
 #include <sstream>
 using std::ostringstream;
+#include <fstream>
+using std::ifstream;
+using std::ofstream;
+#include <sys/stat.h> // for mkdir
+#include <sys/types.h>
 
 #include "../third_party/Eigen/Core"
 using Eigen::initParallel;
@@ -61,17 +67,43 @@ int main(int argc, char *argv[])
 
     
     //ACTUAL NEURALNETWORK EVOLUTION 
-    vector<NeuralNetwork> NNs;
+    /*vector<NeuralNetwork> NNs;
     for (int i = 0; i < NNSIZE; ++i)
     {
+        
+    }*/
+    
+    
+    //NEW READ FROM FILE SECTION *************************************
+    
+    vector<NeuralNetwork> NNs;
+
+    string subdirectory = "gen4992"; 
+    
+    for(int i = 0; i < 100; i++)
+    {
         NNs.push_back(NeuralNetwork(inputs));
+        NNs.back().readWeightsFromFile(subdirectory, to_string(i));
     }
+    
+    for(auto &weight: NNs.back()._weights)
+    {
+        cout << "ROWS" << endl;
+        cout << weight.rows() << endl;
+        cout << "COLS" << endl;
+        cout << weight.cols() << endl;
+        cout << "WEIGHT" << endl;
+        cout << weight << endl;
+        cout << endl << endl;
+    }
+    
+    // END OF NEW SECTION ********************************************************
     
     int bestGeneration = 0;
     int bestPerformance = 0;
     
     int generationNum = 0;
-    while(true)
+    /*while(true)
     {
         cout << "GENERATION #" << generationNum << endl;
         
@@ -140,7 +172,7 @@ int main(int argc, char *argv[])
         // Increment generation
         generationNum += 1;
         cout << endl;
-    }
+    }*/
     
     
     

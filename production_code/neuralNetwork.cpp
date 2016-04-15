@@ -159,6 +159,15 @@ NeuralNetwork::NeuralNetwork(vector<int> topology): _topology(topology)
     }
 }
 
+NeuralNetwork::NeuralNetwork(vector<int> topology, vector<MatrixXXd> layers, vector<MatrixXXd> weights)
+{
+    _performance = 0;
+    _kingValue = dRand(1.0,2.0);
+    _topology = topology;
+    _layers = layers;
+    _weights = weights;
+}
+
 NeuralNetwork NeuralNetwork::spawnChild()
 {
     NeuralNetwork childNetwork(_topology);
@@ -252,7 +261,7 @@ void NeuralNetwork::readWeightsFromFile(const string subdirectory, const string 
 
     if(stat(subdirectory.c_str(), &info) != 0)
     {
-        cout << "Cannot access: " << subdirectory << endl;
+        //cout << "Cannot access: " << subdirectory << endl;
     }
     else if(!(info.st_mode & S_IFDIR))
     {
@@ -263,7 +272,7 @@ void NeuralNetwork::readWeightsFromFile(const string subdirectory, const string 
     stringStream << subdirectory << "/" << weightFilename << ".txt";
     string fileName = stringStream.str();
     
-    cout << "\nAttempting to read from file: " << fileName << endl;
+    //cout << "\nAttempting to read from file: " << fileName << endl;
     
     ifstream file(fileName, ifstream::in);
     
@@ -280,13 +289,13 @@ void NeuralNetwork::readWeightsFromFile(const string subdirectory, const string 
     
     if (file.is_open())
     {
-        getline(file, numWeightsString, '\n');
+        getline(file, numWeightsString, '\n'); // READ LINE (NUMBER OF WEIGHTS)
         numWeights = stoi(numWeightsString);
         
         for(int i = 0; i < numWeights; ++i)
         {
-            getline(file, rowsString, '\n');
-            getline(file, colsString, '\n');
+            getline(file, rowsString, '\n'); // READ LINE (NUMBER OF ROWS)
+            getline(file, colsString, '\n'); // READ LINE (NUMBER OF COLS)
             rows = stoi(rowsString);
             cols = stoi(colsString);
             
@@ -296,12 +305,20 @@ void NeuralNetwork::readWeightsFromFile(const string subdirectory, const string 
             {
                 for(int k = 0; k < cols; ++k)
                 {
-                    getline(file, tempString, ',');
+                    if((j == rows-1) && (k == cols-1))
+                    {
+                        // last line doesn't have comma
+                        getline(file, tempString, '\n'); // READ LINE (WEIGHT)
+                    }
+                    else
+                    {
+                        getline(file, tempString, ','); // READ LINE (WEIGHT)
+                    }
                     (*pointer)(j, k) = stof(tempString);
                 }
             }
             
-            getline(file, tempString, '\n'); // eat the last newline
+            //getline(file, tempString, '\n'); // eat the last newline
             
             allWeights.push_back(*pointer);
             
