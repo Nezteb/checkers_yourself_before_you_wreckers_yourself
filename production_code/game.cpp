@@ -31,6 +31,7 @@ using std::ofstream;
 #include "skynet/checkers_client.hpp"
 #include <stdexcept>
 #include <string>
+#include <unistd.h>
 
 Game::Game(NeuralNetwork *redPlayer, NeuralNetwork *blackPlayer)
 {
@@ -163,6 +164,37 @@ void Game::gameLoop(string directory, string filename)
     writeGameHistoryToFile(directory, filename);
 }
 
+bool isItOurTurn(bool weAreRed, string server, string gameName)
+{
+    skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
+    
+    bool redPlayerTurn;
+    
+    //cout << "GAME STATUS: " << thisGame.status << endl;
+    
+    if(thisGame.status == 0) // red
+    {
+        redPlayerTurn = true;
+    }
+    else if (thisGame.status == 1) // black
+    {
+        redPlayerTurn = false;
+    }
+    
+    if(weAreRed && redPlayerTurn)
+    {
+        return true;
+    }
+    else if(!weAreRed && !redPlayerTurn)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Game::networkGameLoop()
 {
     //cout << "STARTING GAME" << endl;
@@ -170,44 +202,33 @@ void Game::networkGameLoop()
     // take in best weights we have
     
     string server = "skynet.cs.uaf.edu";
-    string gameName = "TESTGAMENOAH";
+    string gameName = "testgame2";
     
-    bool redPlayerTurn = true; // red goes first
+    //bool redPlayerTurn = true; // red goes first
     
     bool gameover = false;
     
-    _currentBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb"; // starting board
+    skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
+    _currentBoard = thisGame.boards.back();
     
     bool ourTurn;
     
     cout << "GAME START" << endl;
+    ourTurn = isItOurTurn(_networkUs->_isRed, server, gameName);
+    
     while (!gameover)
     {
-        skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
-        
-        if(thisGame.status == 0) // red
-        {
-            redPlayerTurn = true;
-        }
-        else if (thisGame.status == 1) // black
-        {
-            redPlayerTurn = false;
-        }
-        else
-        {
-            break; // game over
-        }
-        
-        ourTurn =   (redPlayerTurn && _networkUs->_isRed) ||
-                    (!redPlayerTurn && !(_networkUs->_isRed));
-        
         if(ourTurn)
         {
             cout << "OUR TURN" << endl;
-            _currentBoard = _networkUs->treeSearch(_currentBoard, 8);
+            _currentBoard = _networkUs->treeSearch(_currentBoard, 16);
             
             skynet::checkers::board_t networkBoard(_currentBoard);
             skynet::checkers::play_game(server, gameName, networkBoard);
+            cout << "WE MOVED: " << _currentBoard << endl;
+            
+            //ourTurn = isItOurTurn(_networkUs->_isRed, server, gameName);
+            ourTurn = !ourTurn;
             
             if(_currentBoard == "")
             {
@@ -219,31 +240,18 @@ void Game::networkGameLoop()
             cout << "THEIR TURN" << endl;
             while(true)
             {
-                skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
-        
-                if(thisGame.status == 0) // red
-                {
-                    redPlayerTurn = true;
-                }
-                else if(thisGame.status == 1) // black
-                {
-                    redPlayerTurn = false;
-                }
-                else
-                {
-                    break;
-                }
-                
-                ourTurn =   (redPlayerTurn && _networkUs->_isRed) ||
-                            (!redPlayerTurn && !(_networkUs->_isRed));
+                cout << ".";
+                ourTurn = isItOurTurn(_networkUs->_isRed, server, gameName);
                 
                 if(ourTurn)
                 {
+                    skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
                     _currentBoard = thisGame.boards.back();
+                    cout << "THEY MOVED: " << _currentBoard << endl;
                     break;
                 }
             }
-            
+            cout << endl;
         }
         
         //redPlayerTurn = !redPlayerTurn;
