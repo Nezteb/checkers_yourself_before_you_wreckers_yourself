@@ -180,6 +180,7 @@ void Game::networkGameLoop()
     
     bool ourTurn;
     
+    cout << "GAME START" << endl;
     while (!gameover)
     {
         skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
@@ -202,6 +203,7 @@ void Game::networkGameLoop()
         
         if(ourTurn)
         {
+            cout << "OUR TURN" << endl;
             _currentBoard = _networkUs->treeSearch(_currentBoard, 8);
             
             skynet::checkers::board_t networkBoard(_currentBoard);
@@ -214,6 +216,7 @@ void Game::networkGameLoop()
         }
         else
         {
+            cout << "THEIR TURN" << endl;
             while(true)
             {
                 skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
