@@ -16,7 +16,9 @@ class Game
 {
 public:
     Game(NeuralNetwork *redPlayer, NeuralNetwork *blackPlayer);
+    Game(NeuralNetwork *us, bool weAreRed);
     void gameLoop(string directory, string filename);
+    void networkGameLoop();
     
     ~Game();
 
@@ -26,6 +28,8 @@ private:
 
     NeuralNetwork *_redPlayerPtr;
     NeuralNetwork *_blackPlayerPtr;
+    
+    NeuralNetwork *_networkUs;
     
     string _currentBoard;
     vector<string> _gameHistory;

@@ -26,6 +26,12 @@ using std::ofstream;
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <iostream>
+#include "skynet/checkers.hpp"
+#include "skynet/checkers_client.hpp"
+#include <stdexcept>
+#include <string>
+
 Game::Game(NeuralNetwork *redPlayer, NeuralNetwork *blackPlayer)
 {
     _redPlayerPtr = redPlayer;
@@ -33,6 +39,12 @@ Game::Game(NeuralNetwork *redPlayer, NeuralNetwork *blackPlayer)
     
     _redPlayerPtr->_isRed = true;
     _blackPlayerPtr->_isRed = false;
+}
+
+Game::Game(NeuralNetwork *us, bool weAreRed)
+{
+    _networkUs = us;
+    _networkUs->_isRed = weAreRed;
 }
 
 Game::~Game()
@@ -101,6 +113,7 @@ void Game::gameLoop(string directory, string filename)
         {
             //cout << "RED MOVE" << endl;
             _currentBoard = _redPlayerPtr->treeSearch(_currentBoard, 8);
+            
             if(_currentBoard == "")
             {
                 win = "black";
@@ -111,6 +124,7 @@ void Game::gameLoop(string directory, string filename)
         {
             //cout << "BLACK MOVE" << endl;
             _currentBoard = _blackPlayerPtr->treeSearch(_currentBoard, 8);
+            
             if(_currentBoard == "")
             {
                 win = "red";
@@ -147,4 +161,88 @@ void Game::gameLoop(string directory, string filename)
     int status = system("rm -rf ./gameHistories/gen*");
     
     writeGameHistoryToFile(directory, filename);
+}
+
+void Game::networkGameLoop()
+{
+    //cout << "STARTING GAME" << endl;
+    
+    // take in best weights we have
+    
+    string server = "skynet.cs.uaf.edu";
+    string gameName = "TESTGAMENOAH";
+    
+    bool redPlayerTurn = true; // red goes first
+    
+    bool gameover = false;
+    
+    _currentBoard = "rrrrrrrrrrrr________bbbbbbbbbbbb"; // starting board
+    
+    bool ourTurn;
+    
+    while (!gameover)
+    {
+        skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
+        
+        if(thisGame.status == 0) // red
+        {
+            redPlayerTurn = true;
+        }
+        else if (thisGame.status == 1) // black
+        {
+            redPlayerTurn = false;
+        }
+        else
+        {
+            break; // game over
+        }
+        
+        ourTurn =   (redPlayerTurn && _networkUs->_isRed) ||
+                    (!redPlayerTurn && !(_networkUs->_isRed));
+        
+        if(ourTurn)
+        {
+            _currentBoard = _networkUs->treeSearch(_currentBoard, 8);
+            
+            skynet::checkers::board_t networkBoard(_currentBoard);
+            skynet::checkers::play_game(server, gameName, networkBoard);
+            
+            if(_currentBoard == "")
+            {
+                gameover = true;
+            }
+        }
+        else
+        {
+            while(true)
+            {
+                skynet::checkers::game_info_t thisGame = skynet::checkers::info_game(server, gameName);
+        
+                if(thisGame.status == 0) // red
+                {
+                    redPlayerTurn = true;
+                }
+                else if(thisGame.status == 1) // black
+                {
+                    redPlayerTurn = false;
+                }
+                else
+                {
+                    break;
+                }
+                
+                ourTurn =   (redPlayerTurn && _networkUs->_isRed) ||
+                            (!redPlayerTurn && !(_networkUs->_isRed));
+                
+                if(ourTurn)
+                {
+                    _currentBoard = thisGame.boards.back();
+                    break;
+                }
+            }
+            
+        }
+        
+        //redPlayerTurn = !redPlayerTurn;
+    }
 }

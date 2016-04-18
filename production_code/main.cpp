@@ -5,6 +5,10 @@
 // LINUX
 // g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
+// TO PLAY A GAME ONLINE
+// g++ -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp ./skynet/jsoncpp/json_reader.cpp ./skynet/jsoncpp/json_value.cpp ./skynet/jsoncpp/json_writer.cpp ./skynet/json/json.cpp ./skynet/mongoose/mongoose.c ./skynet/checkers.cpp ./skynet/checkers_client.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
+
+
 // MAC (requires: brew install gcc --without-multilib)
 // g++-5 -w -Ofast --std=c++1y -msse2 -fopenmp -DEIGEN_NO_MALLOC -DEIGEN_NO_DEBUG main.cpp neuralNetwork.cpp tournament.cpp game.cpp -o main.o && time OMP_NUM_THREADS=8 ./main.o 32 40 10 1
 
@@ -64,7 +68,16 @@ int main(int argc, char *argv[])
         cout << "Layer " << i << ": " << inputs[i] << " nodes\n";
     }
     cout << endl;
-
+    
+    // LET'S PLAY THIS GAME ALREADY HOLY COW
+    
+    NeuralNetwork *CYBYWY = new NeuralNetwork(inputs);
+    CYBYWY->readWeightsFromFile("generations", "bestSoFar");
+    bool weAreRed = true;
+    Game theGame(CYBYWY, weAreRed);
+    theGame.networkGameLoop();
+    
+    // LET'S PLAY THIS GAME ALREADY HOLY COW
     
     //ACTUAL NEURALNETWORK EVOLUTION 
     /*vector<NeuralNetwork> NNs;
@@ -76,17 +89,17 @@ int main(int argc, char *argv[])
     
     //NEW READ FROM FILE SECTION *************************************
     
-    vector<NeuralNetwork> NNs;
+    //vector<NeuralNetwork> NNs;
 
-    string subdirectory = "gen4992"; 
+    //string subdirectory = "gen4992"; 
     
-    for(int i = 0; i < 100; i++)
+    /*for(int i = 0; i < 100; i++)
     {
         NNs.push_back(NeuralNetwork(inputs));
         NNs.back().readWeightsFromFile(subdirectory, to_string(i));
-    }
+    }*/
     
-    for(auto &weight: NNs.back()._weights)
+    /*for(auto &weight: NNs.back()._weights)
     {
         cout << "ROWS" << endl;
         cout << weight.rows() << endl;
@@ -95,7 +108,7 @@ int main(int argc, char *argv[])
         cout << "WEIGHT" << endl;
         cout << weight << endl;
         cout << endl << endl;
-    }
+    }*/
     
     // END OF NEW SECTION ********************************************************
     
