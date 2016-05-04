@@ -202,7 +202,7 @@ void Game::networkGameLoop()
     // take in best weights we have
     
     string server = "skynet.cs.uaf.edu";
-    string gameName = "testgame2";
+    string gameName = "";
     
     //bool redPlayerTurn = true; // red goes first
     

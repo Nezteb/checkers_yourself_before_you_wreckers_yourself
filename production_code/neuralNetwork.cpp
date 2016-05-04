@@ -486,8 +486,9 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             swap(temp[index], temp[jumpNorthEast]);
             
             didJump = true;
-            if (!pieceMove(jumps, moves, temp, piece, jumpNorthEast, isRed, canJump)) //if did not jump
+            if (!pieceMove(jumps, moves, temp, piece, jumpNorthEast, isRed, canJump)) // if did not double jump
             {
+                
                 jumps.push_back(temp); //record jump
             }
             
@@ -505,7 +506,7 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             swap(temp[index], temp[jumpNorthWest]);
             
             didJump = true;
-            if (!pieceMove(jumps, moves, temp, piece, jumpNorthWest, isRed, canJump)) //if did not jump
+            if (!pieceMove(jumps, moves, temp, piece, jumpNorthWest, isRed, canJump)) // if did not double jump
             {
                 jumps.push_back(temp); //record jump
             }
@@ -526,13 +527,14 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             // promote pawn if in last row
             if( (temp[jumpSouthEast] == pawn) && (jumpSouthEast >= 28) )
             {
+                didJump = true;
                 temp[jumpSouthEast] = king;
                 jumps.push_back(temp);
             }
             else
             {
                 didJump = true;
-                if (!pieceMove(jumps, moves, temp, piece, jumpSouthEast, isRed, canJump)) //if did not jump
+                if (!pieceMove(jumps, moves, temp, piece, jumpSouthEast, isRed, canJump)) // if did not double jump
                 {
                     jumps.push_back(temp); //record jump
                 }
@@ -554,13 +556,14 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             // promote pawn if in last row
             if( (temp[jumpSouthWest] == pawn) && (jumpSouthWest >= 28) )
             {
+                didJump = true;
                 temp[jumpSouthWest] = king;
                 jumps.push_back(temp);
             }
             else
             {
                 didJump = true;
-                if (!pieceMove(jumps, moves, temp, piece, jumpSouthWest, isRed, canJump)) //if did not jump
+                if (!pieceMove(jumps, moves, temp, piece, jumpSouthWest, isRed, canJump)) // if did not double jump
                 {
                     jumps.push_back(temp); //record jump
                 }
@@ -587,7 +590,7 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             swap(temp[index], temp[jumpSouthEast]);
             
             didJump = true;
-            if (!pieceMove(jumps, moves, temp, piece, jumpSouthEast, isRed, canJump)) //if did not jump
+            if (!pieceMove(jumps, moves, temp, piece, jumpSouthEast, isRed, canJump)) // if did not double jump
             {
                 jumps.push_back(temp); //record jump
             }
@@ -595,7 +598,7 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             temp = currentBoard;
         }
         // king southwest jump
-        if( (southEast != -1) && (jumpSouthWest != -1) &&
+        if( (southWest != -1) && (jumpSouthWest != -1) &&
             (temp[index] == king) &&
             (temp[southWest] == enemyPawn || temp[southWest] == enemyKing) &&
             (temp[jumpSouthWest] == '_')
@@ -606,7 +609,7 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             swap(temp[index], temp[jumpSouthWest]);
             
             didJump = true;
-            if (!pieceMove(jumps, moves, temp, piece, jumpSouthWest, isRed, canJump)) //if did not jump
+            if (!pieceMove(jumps, moves, temp, piece, jumpSouthWest, isRed, canJump)) // if did not double jump
             {
                 jumps.push_back(temp); //record jump
             }
@@ -627,13 +630,14 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             // promote pawn if in last row
             if( (temp[jumpNorthEast] == pawn) && (jumpNorthEast <= 3) )
             {
+                didJump = true;
                 temp[jumpNorthEast] = king;
                 jumps.push_back(temp);
             }
             else
             {
                 didJump = true;
-                if (!pieceMove(jumps, moves, temp, piece, jumpNorthEast, isRed, canJump)) //if did not jump
+                if (!pieceMove(jumps, moves, temp, piece, jumpNorthEast, isRed, canJump)) // if did not double jump
                 {
                     jumps.push_back(temp); //record jump
                 }
@@ -655,13 +659,14 @@ bool NeuralNetwork::pieceMove(vector<string> &jumps, vector<string> &moves, cons
             // promote pawn if in last row
             if( (temp[jumpNorthWest] == pawn) && (jumpNorthWest <= 3) )
             {
+                didJump = true;
                 temp[jumpNorthWest] = king;
                 jumps.push_back(temp);
             }
             else
             {
                 didJump = true;
-                if (!pieceMove(jumps, moves, temp, piece, jumpNorthWest, isRed, canJump)) //if did not jump
+                if (!pieceMove(jumps, moves, temp, piece, jumpNorthWest, isRed, canJump)) // if did not double jump
                 {
                     jumps.push_back(temp); //record jump
                 }
